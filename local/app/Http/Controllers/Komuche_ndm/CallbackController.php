@@ -43,8 +43,8 @@ class CallbackController extends Controller
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm=config('vk.group_id_kndm5');
 
-        $this->secret=config('vk.secret_kndm5')  
-        $this->answer=config('vk.answer_kndm5')
+        $this->secret=config('vk.secret_kndm5');  
+        $this->answer=config('vk.answer_kndm5');
     }
 
 	//отображение постов
