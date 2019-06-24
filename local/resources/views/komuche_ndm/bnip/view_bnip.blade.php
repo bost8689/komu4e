@@ -21,6 +21,7 @@
         </div>
         <div class="card-body">
           @foreach($v_Bnips['Bnips']['c_bnipTypeStatusNull'] as $k_BnipTypeStatusNull => $BnipTypeStatusNull)
+            {{$BnipTypeStatusNull->created_at}}<br>
             {{$BnipTypeStatusNull->text}}
             <br>
             @foreach($BnipTypeStatusNull->Photosbnip as $PhotoBnip)
@@ -33,12 +34,24 @@
               <option value=""></option>
               <option value=Найдено selected>Найдено</option>
               <option value=Потеряно>Потеряно</option>
+              <option value=Удалить>Удалить</option>
             @elseif($BnipTypeStatusNull->status=='Потеряно') 
               <option value=""></option>
               <option value=Найдено>Найдено</option>
               <option value=Потеряно selected>Потеряно</option>
+              <option value=Удалить>Удалить</option>
+            @elseif($BnipTypeStatusNull->status=='Удалить') 
+              <option value=""></option>
+              <option value=Найдено>Найдено</option>
+              <option value=Потеряно>Потеряно</option>
+              <option value=Удалить >Удалить</option>
+            @elseif($BnipTypeStatusNull->status=='') 
+              <option value="" selected></option>
+              <option value=Найдено>Найдено</option>
+              <option value=Потеряно>Потеряно</option>
+              <option value=Удалить >Удалить</option>
             @endif
-            <option value=Удалить>Удалить</option>
+            
             </select>    
             <select class="form-control" name="processingBnip[{{$BnipTypeStatusNull->id}}][typeStatus]" >
             <option value="" selected></option>
@@ -55,6 +68,7 @@
           Список постов пользователя, которые были опубликованы ...<br>
           @if(isset($v_Bnips['Bnips']['c_bnipTypeStatusIs']))
             @foreach($v_Bnips['Bnips']['c_bnipTypeStatusIs'] as $k_BnipTypeStatusIs => $BnipTypeStatusIs)
+              {{$BnipTypeStatusIs->created_at}}<br>
               {{$BnipTypeStatusIs->status}}-{{$BnipTypeStatusIs->type_status}}
               {{$BnipTypeStatusIs->text}}
               <br>

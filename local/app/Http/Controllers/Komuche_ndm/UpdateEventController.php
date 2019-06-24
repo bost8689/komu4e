@@ -34,9 +34,9 @@ class UpdateEventController extends Controller
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
-    public function updateEvent(){
+    public function updateEvent(Request $request){
 
-        if($this->mode_debug){dump('*** UpdateEventController.updateEvent');}
+        if($this->mode_debug){dump('*** UpdateEventController.updateEvent',$request->all());}        
 
         $token_moderator=config('vk.token_moderator');
         $group_id_kndm1=config('vk.group_id_kndm1');
@@ -50,13 +50,19 @@ class UpdateEventController extends Controller
         //test
                 
         if($this->mode_debug){dump('$komuche_ndm_postemessage_last_ts'); dump($Setting_last_ts); }
-        $count_new_ts = $last_ts['ts']-$Setting_last_ts->value1; //кол-во новый событий
-        if($this->mode_debug){dump('Количество новых событий $count_new_ts='); dump($count_new_ts); }
+        $countNewTs = $last_ts['ts']-$Setting_last_ts->value1; //кол-во новый событий
+        if($request->has('btn_update_event')){ //если обновить, то последние
+            $beginTs = $last_ts['ts']-50;
+        }
+        else{
+            $beginTs = $last_ts['ts']-$countNewTs;    
+        }     
+        if($this->mode_debug){dump('Количество новых событий $countNewTs='); dump($countNewTs); }
         if($this->mode_debug){dump('$LongPollServer',$LongPollServer);Log::channel($this->log_name)->info('LongPollServer',$LongPollServer);}
         
         $handler = new CallbackApiMyHandler();          
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);
-        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$last_ts['ts']-$count_new_ts); //$count_new_ts получить последние 2 записи
+        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs); //$countNewTs получить последние 2 записи
         if($this->mode_debug){dump(['$result_executor'=>$result_executor]);}
 
         

@@ -93,7 +93,7 @@ class BnipController extends Controller
                 ]
             ]);
         } 
-        dump($c_Bnips);
+        //dump($c_Bnips);
         return view('komuche_ndm.bnip.view_bnip',['c_Bnips' => $c_Bnips]);
     } //end function update
 
@@ -118,18 +118,15 @@ class BnipController extends Controller
             if ($v_bnip['status']=='Удалить') {
                 //удаляю
                 foreach ($Bnip->photosbnip as $Photobnip) {
-                    dump($Photobnip);
-                    if(!empty($Photobnip)){
-                        $Photobnip->delete();
-                        unlink($Photobnip->pathmax.$Photobnip->filenamemax);    
+                    if (file_exists($Photobnip->pathmax.$Photobnip->filenamemax)) {
+                        unlink($Photobnip->pathmax.$Photobnip->filenamemax);
                     }
-                    
+                    $Photobnip->delete();
                 }                
                 $Bnip -> delete(); 
             }
             elseif ($v_bnip['status']=='Найдено' and $v_bnip['typeStatus']!=Null) {                
-                //публикую    
-                dd('post');            
+                //публикую  
                 $publicPost = $this->publicPost(array('typeStatus' => $v_bnip['typeStatus'],'status' => $v_bnip['status']),$Bnip);
                 $Bnip->type_status = $v_bnip['typeStatus'];
                 $Bnip->post_id=$publicPost['post_id'];
@@ -148,7 +145,8 @@ class BnipController extends Controller
                 $Bnip->type_post=$this->group_id_kndm;
                 $Bnip->save();
             }
-        }       
+        } 
+        return redirect()->route('home');     
 
     }
 
@@ -204,24 +202,23 @@ class BnipController extends Controller
         //$this->group_id_kndm=config('vk.group_id_kndm4');
         //if($this->mode_debug) {dump('MessageController.view');}         
         //if($this->log_write){Log::channel($this->log_name)->info('тест лог');}
-        $collectPeers = collect([]);    
-        //dump($this->group_id_kndm);
-        //dump($this->group_id_kndm);
+        $collectPeers = collect([]);
 
         $params = array(
         'offset' => 0,
-        'count' => 5, //по умолчанию 20, мах 200
-        'all' => 'unread',
+        'count' => 10, //по умолчанию 20, мах 200
+        'filter' => 'unread',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
         // important — беседы, помеченные как важные (только для сообщений сообществ);
         // unanswered — беседы, помеченные как неотвеченные (только для сообщений сообществ). 
         'extended' => 1,//1 — возвращать дополнительные поля для пользователей и сообществ. флаг, может принимать значения 1 или 0.
-        'start_message_id' => 5000,
+        'start_message_id' => 9000,
         'group_id' => $this->group_id_kndm,
         'fields' => 'name,ban_info',        
         );
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
+        //dd($messagesGetConversations);
         //коллекция кол-во диалогов
         $collectPeers->put('countPeers', $messagesGetConversations['count']);
         foreach ($messagesGetConversations['items'] as $k_peer => $v_peer) { 
@@ -284,6 +281,10 @@ class BnipController extends Controller
                 //Узнаём кто автор сообщения из админов
                 if(isset($v_history['admin_author_id'])){
                     $fromName = "Модератор";
+                }
+                elseif(isset($v_history['from_id']) and $v_history['from_id'] == -1*$this->group_id_kndm)
+                {
+                    $fromName = 'Сообщество';
                 }
                 elseif(!isset($v_history['admin_author_id']))
                 {
@@ -377,10 +378,57 @@ class BnipController extends Controller
         if(!empty($a_peers)){
             $collectPeers->put('peers',$a_peers);
         }  
-        if($this->mode_debug) { dump($collectPeers); } 
-        //dump($collectPeers);
+        if($this->mode_debug) { dump($collectPeers); }
+        dump($collectPeers); 
         return view('komuche_ndm.bnip.view_messages_bnip',['peers' => $collectPeers]); 
         //dump($messagesGetHistory);
+    }
+
+    public function processing_message(Request $request){
+        dump('processing_message');
+        dump($request->all());
+        $text=Null;
+        $photo=Null;
+        
+        
+
+        foreach ($request->input('bnip') as $k_bnip => $v_bnip) {
+            
+            $Usersvk = Usersvk::find($v_bnip['usersvk_id']);
+            //если в массиве есть сообщения
+            if (array_key_exists("message", $v_bnip)) {
+                
+                foreach ($v_bnip['message'] as $k_message => $v_message) {
+                    if (array_key_exists("text", $v_message)) {
+                        $text .= $v_message['text'].' ';    
+                    }
+
+                    if(array_key_exists("photo", $v_message)){
+                        foreach ($v_message['photo'] as $k_photo => $urlPhoto) {
+                            $photo[$k_photo]=$urlPhoto;
+                        }
+                    }
+                }
+                
+            }
+
+            if (array_key_exists("message", $v_bnip)) {
+                $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'message','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$text,'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>Null]);
+                if (!empty($photo)) {
+                    foreach ($photo as $k_photo => $urlPhoto) {
+                    $img =Image::make($urlPhoto);
+                    $pathMax = 'public/komu4e_ndm/bnip/naideno/';
+                    $fileNameMax = 'm'.$Bnip->id.'_'.$k_photo.'.'.'jpg';
+                    $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
+                    Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
+                    }
+                }
+                $text=Null;
+                $photo=Null;
+            }
+            
+        }
+        //return redirect()->route('view_bnip'); 
     }
    
 }//end class

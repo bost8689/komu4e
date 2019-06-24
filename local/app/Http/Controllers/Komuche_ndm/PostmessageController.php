@@ -54,7 +54,7 @@ use Intervention\Image\ImageManager;
 
 class PostmessageController extends Controller
 {	
-    public $mode_update = 1; //обновление перед показом включено //if($this->mode_update){}
+    public $mode_update = 0; //обновление перед показом включено //if($this->mode_update){}
     public $log_write = 1; //публикация логов //if($this->log_write){}
     public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_postmessage'; //публикация логов //if($this->log_name){}
@@ -82,7 +82,8 @@ class PostmessageController extends Controller
         if(!isset($checkbox_status_is)){
             //обновление
             $UpdateEventController = new UpdateEventController();
-            if($this->mode_update) {$resultUpdateEvent = $UpdateEventController->updateEvent();}
+            //$test=1;
+            if($this->mode_update) {$resultUpdateEvent = $UpdateEventController->updateEvent($request);}
         }
         
 
@@ -123,8 +124,8 @@ class PostmessageController extends Controller
 
             $token_moderator=config('vk.token_moderator');
         	$group_id_kndm1=config('vk.group_id_kndm1');  
-        	$countAdddbPostmessage = 0;
-        	$countAdddbUsersvk = 0;
+        	$countAddDBPostmessage = 0;
+        	$countAddDBUsersvk = 0;
             //логирование
     		$v_updates = $arr_data['v_updates'];
             if($this->mode_debug){dump('№события=',$arr_data['k_updates']);}
@@ -136,7 +137,6 @@ class PostmessageController extends Controller
                 if($this->log_write){Log::channel($this->log_name)->info('array',$v_updates);}                
                 $Postmessage = Postmessage::where('source_id','=',$v_updates['object']['id'])->first();
                 if (empty($Postmessage)) {
-
                 		$userId = $v_updates['object']['from_id'];
                 		if ($v_updates['object']['from_id']>0) {
                 			$params = array('user_ids' => $userId,'fields' => 'photo_100');
@@ -157,7 +157,7 @@ class PostmessageController extends Controller
                         $Usersvk = Usersvk::where('user_id',$userId)->first();
                         if(!isset($Usersvk)){ 
                         	$Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);
-                        	$countAdddbUsersvk++;
+                        	$countAddDBUsersvk++;
                         }                        	
                         else{ 
                             $Usersvk->photo = $photo;
@@ -166,7 +166,7 @@ class PostmessageController extends Controller
                     
                     //создаю новый объект
                     $Postmessage = Postmessage::create(['source_id'=>$v_updates['object']['id'],'usersvk_id'=>$Usersvk->id,'text'=>$v_updates['object']['text'],'date'=>date('Y-m-d H:m:s',$v_updates['object']['date']),'user_id'=>1,'status'=>Null,'type_status'=>Null]);
-                    $countAdddbPostmessage++;
+                    $countAddDBPostmessage++;
                     //if($this->mode_debug){dump('Запись в БД $Postmessage',$Postmessage);} 
                     //перебираю фото этого поста
                     if (isset($v_updates['object']['attachments'])){                        
@@ -255,7 +255,10 @@ class PostmessageController extends Controller
                 Log::channel($this->log_name)->error('Неизвестный тип поста $v_updates[type]',[$v_updates['type']]);
                 Log::channel($this->log_name)->error('array $v_updates',[$v_updates]);                      
             }
-            return array('countAdddbUsersvk' => $countAdddbUsersvk,'countAdddbPostmessage' => $countAdddbPostmessage);
+            $result['countAddDBPostmessage'] = $countAddDBPostmessage;
+            $result['$countAddDBUsersvk'] = $countAddDBUsersvk;
+
+            return $result;
     } //end function update
 
     //обработка полученных данных
@@ -302,12 +305,12 @@ class PostmessageController extends Controller
                 }
                 elseif($command=='Найдено'){                    
                     $Postmessage->status=$command;
-                    $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>Null,'post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$Postmessage->text,'user_id'=>Auth::user()->id,'status'=>$command,'type_status'=>Null]);
+                    $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'group','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$Postmessage->text,'user_id'=>Auth::user()->id,'status'=>$command,'type_status'=>Null]);
                     $this->savePhoto(array('type'=>$command,'Bnip'=>$Bnip),$Postmessage);
                 }
                 elseif($command=='Потеряно'){                    
                     $Postmessage->status=$command;
-                    $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>Null,'post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$Postmessage->text,'user_id'=>Auth::user()->id,'status'=>$command,'type_status'=>Null]);
+                    $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'group','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$Postmessage->text,'user_id'=>Auth::user()->id,'status'=>$command,'type_status'=>Null]);
                     $this->savePhoto(array('type'=>$command,'Bnip'=>$Bnip),$Postmessage);
                 }
                 elseif($command=='Заказ'){                    

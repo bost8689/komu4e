@@ -68,7 +68,7 @@ class MessageController extends Controller
         $params = array(
         'offset' => 0,
         'count' => 2, //по умолчанию 20, мах 200
-        'all' => 'unread',
+        'filter' => 'unread',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
         // important — беседы, помеченные как важные (только для сообщений сообществ);

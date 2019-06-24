@@ -32,7 +32,7 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	// Route::get('/home', 'HomeController@index')->middleware('auth')->name('home');
 	Route::get('/home', 'HomeController@index')->name('home');
 
-	Route::get('/UpdateEvent', 'Komuche_ndm\UpdateEventController@updateEvent')->name('updateEvent');
+	Route::post('/UpdateEvent', 'Komuche_ndm\UpdateEventController@updateEvent')->name('updateEvent');
 
 	//Postmessage
 	Route::match(['get', 'post'],'/postmessage', 'Komuche_ndm\PostmessageController@view')->name('view_postmessage');
@@ -40,9 +40,11 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	Route::match(['get', 'post'],'/postmessage/find', 'Komuche_ndm\PostmessageController@find')->name('find_postmessage');
 
 	//Bnip
-	Route::post('/bnip', 'Komuche_ndm\BnipController@view')->name('view_bnip');
+	Route::match(['get', 'post'],'/bnip', 'Komuche_ndm\BnipController@view')->name('view_bnip');
 	Route::post('/bnip/processing', 'Komuche_ndm\BnipController@processingBnip')->name('processingBnip');
 	Route::post('/bnip/message', 'Komuche_ndm\BnipController@view_message')->name('view_message_bnip');
+	Route::post('/bnip/message/processing', 'Komuche_ndm\BnipController@processing_message')->name('processing_message_bnip');
+	
 
 	//Order
 	Route::get('/order','Komuche_ndm\OrderController@view')->name('view_order');
@@ -55,6 +57,8 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	//Message
 	Route::post('/message','Komuche_ndm\MessageController@view')->name('view_message');
 	Route::post('/message/processing','Komuche_ndm\MessageController@processingMessage')->name('processingMessage');
+
+
 
 });
 

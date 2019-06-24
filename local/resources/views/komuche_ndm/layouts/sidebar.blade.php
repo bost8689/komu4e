@@ -54,14 +54,14 @@
               </label>             
             </div> 
             <div class="col-sm-14">
-              <button type="submit" class="btn btn-primary">Найти</button>
+              <button type="submit" class="btn btn-primary" name="btn_view_wall">Найти</button>
             </div>          
           </form>
           <p>
-          <form class="form-horizontal" role="form" method="GET" action="{{ route('updateEvent') }}">
+          <form class="form-horizontal" role="form" method="POST" action="{{ route('updateEvent') }}">
             {{ csrf_field() }} 
             <div class="col-sm-14">
-              <button type="submit" class="btn btn-primary">Обновить</button>
+              <button type="submit" class="btn btn-primary" name="btn_update_event">Обновить</button>
             </div>          
           </form>
         </div>

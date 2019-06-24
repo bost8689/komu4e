@@ -9,7 +9,11 @@
       </div>          
       @endif
           Кол-во сообщений {{$peers['countPeers']}}
+          <form role="form" action="{{route('processing_message_bnip')}}" method=POST>
+          {{ csrf_field() }}
           @if(!empty($peers['peers']))
+          
+          
             @foreach($peers['peers'] as $peer)
             <div class="card">
             <div class="card-header">
@@ -17,29 +21,39 @@
               <a href=https://vk.com/id{{$peer['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя id{{$peer['Usersvk']->user_id}}" >{{$peer['Usersvk']->firstname}} {{$peer['Usersvk']->lastname}}</a>
               @if(isset($peer['banUsersvk']))
                 Пользователь заблокирован
-              @endif              
+              @endif
+              <input type="hidden" name="bnip[{{$loop->index}}][usersvk_id]" value="{{$peer['Usersvk']->id}}">              
             </div>
             <div class="card-body">
-              <form role="form" action="{{route('processingMessage')}}" method=POST>
-              {{ csrf_field() }}
+              
               <textarea class="form-control normal" rows = "0" name=>тест</textarea> 
               <div class="form-group">
-              <select class="form-control" name= size=1>
+              <select class="form-control" name="select" size=1>
               <option value="" selected></option>
               <option value=Прайс>Прайс</option>
               <option value=Прайс>Реквизиты</option>              
               </select> 
-              <button id="btn_send_message" type="submit" class="btn btn-primary" name=btn_send_message>Отправить</button>
               </div> 
-              </form>    
+                  
 
               @foreach ($peer['messages'] as $message)
                 {{$loop->index+1}} {{$message['from_name']}}<br>
-                {{$message['text']}}
+                <div class="checkbox">
+                 <label>
+                  {{--checked="checked"--}}
+                  <input type="checkbox" name="bnip[{{$loop->parent->index}}][message][{{$loop->index}}][text]" value="{{$message['text']}}">
+                  {{$message['text']}}
+                  </label>
+                </div>
                 @if(isset($message['photo']))
-                  @foreach ($message['photo'] as $photo)
-                    <a href={{$photo['url_photo_type_max']}} target=_blank title="Просмотреть фото">
-                    <img src={{$photo['url_photo_type_min']}} alt="..." class="img-rounded"></a>
+                  @foreach ($message['photo'] as $photo)                      
+                      <div class="checkbox">
+                      <label>
+                      <input type="checkbox" name="bnip[{{$loop->parent->parent->index}}][message][{{$loop->parent->index}}][photo][{{$loop->index}}]" value="{{$photo['url_photo_type_max']}}">
+                      <a href={{$photo['url_photo_type_max']}} target=_blank title="Просмотреть фото">
+                      <img src={{$photo['url_photo_type_min']}} alt="..." class="img-rounded"></a>
+                      </label>
+                    </div>
                   @endforeach
                 @endif
                 <br>
@@ -48,9 +62,18 @@
             <br>
             </div>
             </div>
-            @endforeach
+            @endforeach           
           @endif          
-             
+          <div class="form-group">
+          <button id="button_processing" type="submit" class="btn btn-primary" name=button_processing>Обработать</button>
+          <div class="checkbox">
+           <label>
+            <input type="checkbox" name=checkbox_prosmotreno value=Просмотрено checked="checked">
+            Пометить, как просмотренные
+            </label>
+          </div>
+          </div>
+          </form>
     </div>    
 @endsection
     
