@@ -410,7 +410,6 @@ class BnipController extends Controller
                     }
                 }                
             }
-
             if ($v_bnip['type_status']=='Найдено') {
                 if (array_key_exists("message", $v_bnip)) {
                     $this->create_bnip_from_message(array('type_status'=>$v_bnip['type_status'],'photo' =>$photo,'text'=>$text),$Usersvk);
@@ -453,7 +452,7 @@ class BnipController extends Controller
 
 
     public function create_bnip_from_message(array $arrData,$Usersvk){
-        $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'message','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$arrData['text'],'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>$arrData['type_status']]);
+        $Bnip = Bnip::create(['source_id'=>$Usersvk->user_id,'type_source'=>'user','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$arrData['text'],'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>$arrData['type_status']]);
         if ($arrData['type_status']=='Найдено') {
             $pathMax = 'public/komu4e_ndm/bnip/naideno';
         }

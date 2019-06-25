@@ -26,6 +26,13 @@
                 <button type="submit" class="btn btn-primary">Добавить</button>
               </div>
             </form>
+            <p>
+            <form role="form" action="{{route('view_order')}}" method="post"> 
+            {{csrf_field()}}
+            <div class="col-sm-14">
+              <button type="submit" class="btn btn-primary">Показать</button>
+            </div> 
+          </form>
           </div>
         </div>     
       </div>
@@ -40,8 +47,7 @@
               <div class="form-group">              
                 <div class="col-sm-14">
                  <input type=date class="form-control" name=date_view_wall value={{ date('Y-m-d',time()) }}>
-               </div>             
-               
+               </div>
              </div>
              <div class="checkbox">
               <label>

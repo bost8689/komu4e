@@ -10,8 +10,6 @@
       @endif
       <form role="form" action="{{route('processingBnip')}}" method=POST>
       {{ csrf_field() }}  
-
-
       @foreach($c_Bnips as $v_Bnips)
       <div class="card">
         <div class="card-header">

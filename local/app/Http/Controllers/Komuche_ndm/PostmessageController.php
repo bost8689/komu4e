@@ -54,7 +54,7 @@ use Intervention\Image\ImageManager;
 
 class PostmessageController extends Controller
 {	
-    public $mode_update = 0; //обновление перед показом включено //if($this->mode_update){}
+    public $mode_update = 1; //обновление перед показом включено //if($this->mode_update){}
     public $log_write = 1; //публикация логов //if($this->log_write){}
     public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_postmessage'; //публикация логов //if($this->log_name){}

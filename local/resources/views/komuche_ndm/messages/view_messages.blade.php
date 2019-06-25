@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @extends('komuche_ndm.layouts.sidebar')
-{{-- test --}}
 @section('main')
     <div class="col-sm-8">
       @if (session('status'))

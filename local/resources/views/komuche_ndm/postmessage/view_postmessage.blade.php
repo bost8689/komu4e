@@ -17,20 +17,23 @@
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя">
           <img src={{$collectPostmessage['Usersvk']->photo}} alt="..." class="img-rounded" height="50px"></a>
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя id{{$collectPostmessage['Usersvk']->user_id}}" >{{$collectPostmessage['Usersvk']->firstname}} {{$collectPostmessage['Usersvk']->lastname}}</a>
-          @if ($collectPostmessage['Orders']->count())
-            Внимание рекламодатель!
-          @endif 
+          
           <input  type="hidden" name="processing[{{$loop->index}}][usersvk_id]" value="{{$collectPostmessage['Usersvk']->id}}"> 
           <input  type="hidden" name="processing[{{$loop->index}}][user_id]" value="{{$collectPostmessage['Usersvk']->user_id}}">
 
-          @if ($collectPostmessage['Orders']->count())
-            @foreach ($collectPostmessage['Orders'] as $Order)
-              <input  type="hidden" name="processing[{{$loop->parent->index}}][Orders][{{$loop->index}}][id]" value="{{$Order->id}}">
-            @endforeach
-                        
-          @endif         
+                  
         </div>
         <div class="card-body">
+          @if ($collectPostmessage['Orders']->count())
+            <div class="alert alert-danger" role="alert">
+              Внимание рекламодатель!<p>          
+              @foreach ($collectPostmessage['Orders'] as $Order)
+                Заказ №{{$Order->id }} : Заказано {{$Order->ordered}} : Выполнено {{$Order->executed}}<p> 
+                <input  type="hidden" name="processing[{{$loop->parent->index}}][Orders][{{$loop->index}}][id]" value="{{$Order->id}}">
+              @endforeach  
+            </div>                      
+          @endif 
+          
           @foreach($collectPostmessage['Postmessages'] as $Postmessage)
             <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a> {{$Postmessage->status}} @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif          
             <br>

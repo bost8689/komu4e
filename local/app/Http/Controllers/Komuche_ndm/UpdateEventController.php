@@ -30,7 +30,7 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 class UpdateEventController extends Controller
 {	
     public $log_write = 1; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
@@ -54,7 +54,7 @@ class UpdateEventController extends Controller
         if($request->has('btn_update_event')){ //если обновить, то последние
             $beginTs = $last_ts['ts']-50;
         }
-        else{
+        else{            
             $beginTs = $last_ts['ts']-$countNewTs;    
         }     
         if($this->mode_debug){dump('Количество новых событий $countNewTs='); dump($countNewTs); }

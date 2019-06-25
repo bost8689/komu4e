@@ -47,10 +47,10 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	
 
 	//Order
-	Route::get('/order','Komuche_ndm\OrderController@view')->name('view_order');
+	Route::match(['get', 'post'],'/order','Komuche_ndm\OrderController@view')->name('view_order');
 	Route::post('/order/add','Komuche_ndm\OrderController@add')->name('add_order');
 	Route::post('/order/processing','Komuche_ndm\OrderController@processing_add')->name('processing_add_order');
-	//Route::post('/order','Komuche_ndm\OrderController@delete')->name('delete_order');
+	Route::post('/order/delete','Komuche_ndm\OrderController@delete_order')->name('delete_order');
 	//Route::get('/order/add/processing', function () {  abort(404); });
 
 
