@@ -9,7 +9,7 @@
         <div class="card">
           <div class="card-header">Заказыы</div>
           <div class="card-body">          
-            <form class="form-horizontal" role="form" method="POST" action="{{ route('add_order')}}">
+            <form class="form-horizontal" role="form" method="POST" action="{{route('add_order')}}">
               {{csrf_field()}} 
               <div class="form-group">
                 <div class="col-sm-14">

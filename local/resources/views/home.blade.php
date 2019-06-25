@@ -4,7 +4,7 @@
 @section('main')
     <div class="col-sm-8">
       <div class="card">
-        <div class="card-header">Cтенаfff1</div>
+        <div class="card-header">Cтена</div>
         <div class="card-body">
           @if (session('status'))
           <div class="alert alert-success" role="alert">

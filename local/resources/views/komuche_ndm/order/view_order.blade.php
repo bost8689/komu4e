@@ -15,7 +15,7 @@
                 <div class="card-body">
                   <div class="checkbox">
                     <label>                  
-                    <input type="checkbox" name="order_id" value="{{$Order->id}}">
+                    <input type="checkbox" name="order_id[{{$loop->index}}]" value="{{$Order->id}}">
                     Заказ №{{$Order->id}} :
                     Заказано {{$Order->ordered}} :
                     Выполнено {{$Order->executed}}                  

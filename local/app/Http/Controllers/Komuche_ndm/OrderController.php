@@ -117,4 +117,15 @@ class OrderController extends Controller
         
     }
 
+    public function delete_order(Request $request)
+    {
+        if($request->has('order_id')){
+            foreach ($request->input('order_id') as $orderId) {
+                $Order = Order::find($orderId);
+                $Order->delete();
+            }
+        } 
+        return redirect()->route('view_order');
+    }
+
 }

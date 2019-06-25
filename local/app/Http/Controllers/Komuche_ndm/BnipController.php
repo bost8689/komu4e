@@ -102,7 +102,7 @@ class BnipController extends Controller
     public function processingBnip(Request $request){
         //dump($request->all());
         $bnips = $request->input('processingBnip');
-        dump($bnips);
+        //dump($bnips);
         foreach ($bnips as $k_bnip => $v_bnip) {
             $Bnip = Bnip::with('Usersvk','Photosbnip')->find($v_bnip['bnip_id']);
             $Bnip->status = $v_bnip['status'];
@@ -196,7 +196,7 @@ class BnipController extends Controller
     }
 
     public function view_message(Request $request){
-        dump('message');
+        //dump('message');
 
         //$this->token_moderator=config('vk.token_moderator');
         //$this->group_id_kndm=config('vk.group_id_kndm4');
@@ -379,16 +379,16 @@ class BnipController extends Controller
             $collectPeers->put('peers',$a_peers);
         }  
         if($this->mode_debug) { dump($collectPeers); }
-        dump($collectPeers); 
+        //dump($collectPeers); 
         return view('komuche_ndm.bnip.view_messages_bnip',['peers' => $collectPeers]); 
         //dump($messagesGetHistory);
     }
 
     public function processing_message(Request $request){
-        dump('processing_message');
-        dump($request->all());
+        //dump('processing_message');
+        //dump($request->all());
         foreach ($request->input('bnip') as $k_bnip => $v_bnip) {
-            dump($v_bnip);
+            //dump($v_bnip);
             $text=Null;
             $photo=Null;
             $k=0;
