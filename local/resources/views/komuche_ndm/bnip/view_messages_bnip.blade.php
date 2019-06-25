@@ -12,8 +12,6 @@
           <form role="form" action="{{route('processing_message_bnip')}}" method=POST>
           {{ csrf_field() }}
           @if(!empty($peers['peers']))
-          
-          
             @foreach($peers['peers'] as $peer)
             <div class="card">
             <div class="card-header">
@@ -22,20 +20,20 @@
               @if(isset($peer['banUsersvk']))
                 Пользователь заблокирован
               @endif
+
               <input type="hidden" name="bnip[{{$loop->index}}][usersvk_id]" value="{{$peer['Usersvk']->id}}">              
             </div>
             <div class="card-body">
-              
-              <textarea class="form-control normal" rows = "0" name=>тест</textarea> 
+              <textarea class="form-control normal" rows = "0" name="bnip[{{$loop->index}}][text_send]"></textarea> 
               <div class="form-group">
-              <select class="form-control" name="select" size=1>
+              <select class="form-control" name="bnip[{{$loop->index}}][type_status]" size=1>
               <option value="" selected></option>
-              <option value=Прайс>Прайс</option>
-              <option value=Прайс>Реквизиты</option>              
+              <option value=Найдено>Найдено</option>
+              <option value=Потеряно>Потеряно</option>
+              <option value=Ошибка>Ошибка</option>
+              <option value=Повтор>Повтор</option>                  
               </select> 
-              </div> 
-                  
-
+              </div>
               @foreach ($peer['messages'] as $message)
                 {{$loop->index+1}} {{$message['from_name']}}<br>
                 <div class="checkbox">

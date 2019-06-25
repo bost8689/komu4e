@@ -16,7 +16,6 @@
         <div class="card-header">
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя">
           <img src={{$collectPostmessage['Usersvk']->photo}} alt="..." class="img-rounded" height="50px"></a>
-
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя id{{$collectPostmessage['Usersvk']->user_id}}" >{{$collectPostmessage['Usersvk']->firstname}} {{$collectPostmessage['Usersvk']->lastname}}</a>
           @if ($collectPostmessage['Orders']->count())
             Внимание рекламодатель!

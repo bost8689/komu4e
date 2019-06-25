@@ -387,48 +387,98 @@ class BnipController extends Controller
     public function processing_message(Request $request){
         dump('processing_message');
         dump($request->all());
-        $text=Null;
-        $photo=Null;
-        
-        
-
         foreach ($request->input('bnip') as $k_bnip => $v_bnip) {
-            
+            dump($v_bnip);
+            $text=Null;
+            $photo=Null;
+            $k=0;
             $Usersvk = Usersvk::find($v_bnip['usersvk_id']);
             //если в массиве есть сообщения
             if (array_key_exists("message", $v_bnip)) {
-                
-                foreach ($v_bnip['message'] as $k_message => $v_message) {
+                //dump('message',$v_bnip);
+                foreach ($v_bnip['message'] as $v_message) {
                     if (array_key_exists("text", $v_message)) {
                         $text .= $v_message['text'].' ';    
                     }
 
                     if(array_key_exists("photo", $v_message)){
-                        foreach ($v_message['photo'] as $k_photo => $urlPhoto) {
-                            $photo[$k_photo]=$urlPhoto;
+                        foreach ($v_message['photo'] as $urlPhoto) {
+                            $photo[$k++]=$urlPhoto;
+                            //dump('$photo ',$photo);
+                            //dump($urlPhoto);
                         }
                     }
-                }
-                
+                }                
             }
 
-            if (array_key_exists("message", $v_bnip)) {
-                $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'message','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$text,'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>Null]);
-                if (!empty($photo)) {
-                    foreach ($photo as $k_photo => $urlPhoto) {
-                    $img =Image::make($urlPhoto);
-                    $pathMax = 'public/komu4e_ndm/bnip/naideno/';
-                    $fileNameMax = 'm'.$Bnip->id.'_'.$k_photo.'.'.'jpg';
-                    $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
-                    Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
-                    }
+            if ($v_bnip['type_status']=='Найдено') {
+                if (array_key_exists("message", $v_bnip)) {
+                    $this->create_bnip_from_message(array('type_status'=>$v_bnip['type_status'],'photo' =>$photo,'text'=>$text),$Usersvk);
+                    $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
+                    $this->send_message(array('message' => $message),$Usersvk);
                 }
-                $text=Null;
-                $photo=Null;
+            }
+            elseif($v_bnip['type_status']=='Потеряно'){
+                //если есть message
+                if (array_key_exists("message", $v_bnip)) {
+                    $this->create_bnip_from_message(array('type_status'=>$v_bnip['type_status'],'photo' =>$photo,'text'=>$text),$Usersvk);
+                }
+            }
+            elseif($v_bnip['type_status']=='Ошибка'){
+                //отправляю сообщение, что Вы ошиблись группой
+                $message='Здравствуйте, возможно Вы ошиблись группой. Потеряшка - это находки и потери'."\n".'
+                    По всем вопросам пишите в сообщения соответствующего сообщества. Например КомуЧё Объявления по этой ссылке https://vk.com/im?sel=-46590816'."\n".'
+                    Наши сообщества:'."\n".'
+                    КомуЧё Надым - городское сообщество. https://vk.com/komuche_nadym'."\n".'
+                    КомуЧё Авто - попутчики, грузо и пассажироперевозки https://vk.com/auto_nadym'."\n".'
+                    КомуЧё Потеряшка - бюро находок и потерь https://vk.com/bnip_nadym'."\n".'
+                    КомуЧё Мамочки https://vk.com/komuche_mamomochki'."\n".'
+                    КомуЧё Объявления - https://vk.com/komuche'."\n".'
+                    С Уважением команда КомуЧё';
+                $this->send_message(array('message' => $message),$Usersvk);
+            }
+            elseif($v_bnip['type_status']=='Повтор'){
+                 $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
+                 $this->send_message(array('message' => $message),$Usersvk);
+
+
+                //отправляю сообщение, что Вы ошиблись группой
             }
             
         }
+        /*VK::messagesmarkAsRead($access_token_bnip,$message_ids); //делаю сообщения прочитанными*/
+
         //return redirect()->route('view_bnip'); 
+    }
+
+
+    public function create_bnip_from_message(array $arrData,$Usersvk){
+        $Bnip = Bnip::create(['source_id'=>Null,'type_source'=>'message','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$arrData['text'],'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>$arrData['type_status']]);
+        if ($arrData['type_status']=='Найдено') {
+            $pathMax = 'public/komu4e_ndm/bnip/naideno';
+        }
+        elseif($arrData['type_status']=='Потеряно'){
+            $pathMax = 'public/komu4e_ndm/bnip/poteryano';
+        }        
+        if (!empty($arrData['photo'])) {
+            foreach ($arrData['photo'] as $k_photo => $urlPhoto) {
+            $img =Image::make($urlPhoto);
+            $fileNameMax = 'm'.$Bnip->id.'_'.$k_photo.'.'.'jpg';
+            $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
+            Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
+            }
+        }
+    }
+
+    //отправка сообщений
+    public function send_message(array $arrData,$Usersvk){
+        $params = array(             
+            'user_id' => $Usersvk->user_id,
+            'message' => $arrData['message'], //220409092 Вячеслав Тихонов
+            'random_id'=> rand(), //рандомное число
+            //'group_ids' => $group_ids,    
+        );
+        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);       
     }
    
 }//end class

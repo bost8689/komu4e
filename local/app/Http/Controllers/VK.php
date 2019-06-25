@@ -282,6 +282,27 @@ class VK extends Controller
 	'owner_id' => $count, 	
 	)*/
 
+	    static function messagesSend($access_token,$params,$data)
+    {        
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->messages()->send($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			if(!empty($data['log_name'])){
+				Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			}			
+		} 		
+	    
+
+    } 
+    /*array(             
+    'user_id' => $user_id,
+    'message' => $message, //220409092 Вячеслав Тихонов
+    //'group_ids' => $group_ids,	
+	)*/
+
 
 }//class
 
