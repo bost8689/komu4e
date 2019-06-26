@@ -384,6 +384,7 @@ class BnipController extends Controller
         //dump($messagesGetHistory);
     }
 
+    //view -> 
     public function processing_message(Request $request){
         //dump('processing_message');
         //dump($request->all());
@@ -410,20 +411,24 @@ class BnipController extends Controller
                     }
                 }                
             }
-            if ($v_bnip['type_status']=='Найдено') {
+            if ($v_bnip['status']=='Найдено') {
                 if (array_key_exists("message", $v_bnip)) {
-                    $this->create_bnip_from_message(array('type_status'=>$v_bnip['type_status'],'photo' =>$photo,'text'=>$text),$Usersvk);
-                    $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
+                    $this->create_bnip_from_message(array('status'=>$v_bnip['status'],'photo' =>$photo,'text'=>$text),$Usersvk);
+                    $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
                     $this->send_message(array('message' => $message),$Usersvk);
                 }
             }
-            elseif($v_bnip['type_status']=='Потеряно'){
+            elseif($v_bnip['status']=='Потеряно'){
                 //если есть message
+                //dump($v_bnip);
                 if (array_key_exists("message", $v_bnip)) {
-                    $this->create_bnip_from_message(array('type_status'=>$v_bnip['type_status'],'photo' =>$photo,'text'=>$text),$Usersvk);
+                    //dd('Потеряно');
+                    $this->create_bnip_from_message(array('status'=>$v_bnip['status'],'photo' =>$photo,'text'=>$text),$Usersvk);
+                    $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
+                    $this->send_message(array('message' => $message),$Usersvk);
                 }
             }
-            elseif($v_bnip['type_status']=='Ошибка'){
+            elseif($v_bnip['status']=='Ошибка'){
                 //отправляю сообщение, что Вы ошиблись группой
                 $message='Здравствуйте, возможно Вы ошиблись группой. Потеряшка - это находки и потери'."\n".'
                     По всем вопросам пишите в сообщения соответствующего сообщества. Например КомуЧё Объявления по этой ссылке https://vk.com/im?sel=-46590816'."\n".'
@@ -436,7 +441,7 @@ class BnipController extends Controller
                     С Уважением команда КомуЧё';
                 $this->send_message(array('message' => $message),$Usersvk);
             }
-            elseif($v_bnip['type_status']=='Повтор'){
+            elseif($v_bnip['status']=='Повтор'){
                  $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
                  $this->send_message(array('message' => $message),$Usersvk);
 
@@ -447,16 +452,16 @@ class BnipController extends Controller
         }
         /*VK::messagesmarkAsRead($access_token_bnip,$message_ids); //делаю сообщения прочитанными*/
 
-        //return redirect()->route('view_bnip'); 
+        return redirect()->route('view_bnip'); 
     }
 
 
     public function create_bnip_from_message(array $arrData,$Usersvk){
-        $Bnip = Bnip::create(['source_id'=>$Usersvk->user_id,'type_source'=>'user','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$arrData['text'],'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>$arrData['type_status']]);
-        if ($arrData['type_status']=='Найдено') {
+        $Bnip = Bnip::create(['source_id'=>$Usersvk->user_id,'type_source'=>'user','post_id'=>Null,'type_post'=>Null,'usersvk_id'=>$Usersvk->id,'text'=>$arrData['text'],'user_id'=>Auth::user()->id,'status'=>$arrData['status'],'type_status'=>Null]);
+        if ($arrData['status']=='Найдено') {
             $pathMax = 'public/komu4e_ndm/bnip/naideno';
         }
-        elseif($arrData['type_status']=='Потеряно'){
+        elseif($arrData['status']=='Потеряно'){
             $pathMax = 'public/komu4e_ndm/bnip/poteryano';
         }        
         if (!empty($arrData['photo'])) {

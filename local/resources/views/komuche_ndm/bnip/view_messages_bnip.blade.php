@@ -26,7 +26,7 @@
             <div class="card-body">
               <textarea class="form-control normal" rows = "0" name="bnip[{{$loop->index}}][text_send]"></textarea> 
               <div class="form-group">
-              <select class="form-control" name="bnip[{{$loop->index}}][type_status]" size=1>
+              <select class="form-control" name="bnip[{{$loop->index}}][status]" size=1>
               <option value="" selected></option>
               <option value=Найдено>Найдено</option>
               <option value=Потеряно>Потеряно</option>
