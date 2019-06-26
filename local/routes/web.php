@@ -39,6 +39,8 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	Route::post('/postmessage/processing', 'Komuche_ndm\PostmessageController@processing')->name('processing_postmessage');
 	Route::match(['get', 'post'],'/postmessage/find', 'Komuche_ndm\PostmessageController@find')->name('find_postmessage');
 
+
+
 	//Bnip
 	Route::match(['get', 'post'],'/bnip', 'Komuche_ndm\BnipController@view')->name('view_bnip');
 	Route::post('/bnip/processing', 'Komuche_ndm\BnipController@processingBnip')->name('processingBnip');
@@ -56,7 +58,7 @@ Route::group(['middleware' => ['auth','permission']], function () {
 
 	//Message
 	Route::post('/message','Komuche_ndm\MessageController@view')->name('view_message');
-	Route::post('/message/processing','Komuche_ndm\MessageController@processingMessage')->name('processingMessage');
+	Route::post('/message/processing','Komuche_ndm\MessageController@processing_message')->name('processing_message');
 
 
 

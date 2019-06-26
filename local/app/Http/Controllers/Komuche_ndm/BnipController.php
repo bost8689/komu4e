@@ -98,7 +98,6 @@ class BnipController extends Controller
     } //end function update
 
     //обработка полученных данных
-
     public function processingBnip(Request $request){
         //dump($request->all());
         $bnips = $request->input('processingBnip');
@@ -106,15 +105,9 @@ class BnipController extends Controller
         foreach ($bnips as $k_bnip => $v_bnip) {
             $Bnip = Bnip::with('Usersvk','Photosbnip')->find($v_bnip['bnip_id']);
             $Bnip->status = $v_bnip['status'];
-            
-            //$Bnip->text = 'text'; //тут должен быть  мой отредактированный текст
             $Bnip->user_id=Auth::user()->id;
             $Bnip->save();
             //пкбликую в потеряшку
-
-            
-            //$hashteg = $hashteg.' '.'#'.'Komu4e';
-
             if ($v_bnip['status']=='Удалить') {
                 //удаляю
                 foreach ($Bnip->photosbnip as $Photobnip) {
@@ -130,10 +123,10 @@ class BnipController extends Controller
                 $publicPost = $this->publicPost(array('typeStatus' => $v_bnip['typeStatus'],'status' => $v_bnip['status']),$Bnip);
                 $Bnip->type_status = $v_bnip['typeStatus'];
                 $Bnip->post_id=$publicPost['post_id'];
-                // $Bnip->status=$v_bnip['status'];
-                // $Bnip->type_status=$v_bnip['typeStatus'];
                 $Bnip->type_post=$this->group_id_kndm;
                 $Bnip->save();
+                $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
+                $this->send_message(array('message' => $message),$Bnip->Usersvk);
             }
             elseif($v_bnip['status']=='Потеряно' and $v_bnip['typeStatus']!=Null){
                 //публикую
@@ -144,6 +137,8 @@ class BnipController extends Controller
                 // $Bnip->type_status=$v_bnip['typeStatus'];
                 $Bnip->type_post=$this->group_id_kndm;
                 $Bnip->save();
+                // $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
+                // $this->send_message(array('message' => $message),$Bnip->Usersvk);
             }
         } 
         return redirect()->route('home');     
@@ -413,9 +408,7 @@ class BnipController extends Controller
             }
             if ($v_bnip['status']=='Найдено') {
                 if (array_key_exists("message", $v_bnip)) {
-                    $this->create_bnip_from_message(array('status'=>$v_bnip['status'],'photo' =>$photo,'text'=>$text),$Usersvk);
-                    $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
-                    $this->send_message(array('message' => $message),$Usersvk);
+                    $this->create_bnip_from_message(array('status'=>$v_bnip['status'],'photo' =>$photo,'text'=>$text),$Usersvk);                    
                 }
             }
             elseif($v_bnip['status']=='Потеряно'){
@@ -424,8 +417,8 @@ class BnipController extends Controller
                 if (array_key_exists("message", $v_bnip)) {
                     //dd('Потеряно');
                     $this->create_bnip_from_message(array('status'=>$v_bnip['status'],'photo' =>$photo,'text'=>$text),$Usersvk);
-                    $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
-                    $this->send_message(array('message' => $message),$Usersvk);
+                    // $message='Здравствуйте, мы разместили Вашу запись.'."\n".'С Уважением команда КомуЧё';
+                    // $this->send_message(array('message' => $message),$Usersvk);
                 }
             }
             elseif($v_bnip['status']=='Ошибка'){

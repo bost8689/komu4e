@@ -29,7 +29,7 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 
 class UpdateEventController extends Controller
 {	
-    public $log_write = 1; //публикация логов //if($this->log_write){}
+    public $log_write = 0; //публикация логов //if($this->log_write){}
     public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
@@ -105,6 +105,17 @@ class UpdateEventController extends Controller
             elseif($v_updates['type']=='group_join'){               
                 if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
             }
+            elseif($v_updates['type']=='group_leave'){               
+                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
+            }            
+            elseif($v_updates['type']=='message_new'){               
+                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
+            }
+            elseif($v_updates['type']=='message_reply'){               
+                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
+            }
+
+            
             else{
                 dump('Неизвестный тип поста $v_updates[type]',$v_updates['type']);
                 Log::channel($this->log_name)->error('Неизвестный тип поста - $v_updates[type]',[$v_updates['type']]);
@@ -113,7 +124,7 @@ class UpdateEventController extends Controller
         }
         $Setting_last_ts->value1=$last_ts['ts'];
         $Setting_last_ts->save();
-        return;       
+        return redirect()->route('home');       
     } //end function update
 
 }//end class

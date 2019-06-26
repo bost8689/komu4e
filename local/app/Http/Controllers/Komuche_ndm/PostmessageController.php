@@ -239,7 +239,9 @@ class PostmessageController extends Controller
                                     $url_photo_type_max=$url_photo_type_y;}
                                 elseif (isset($url_photo_type_z)) {$url_photo_type_max=$url_photo_type_z;}
                                 elseif (isset($url_photo_type_w)) {$url_photo_type_max=$url_photo_type_w;}
-                                elseif (isset($url_photo_type_o)) {$url_photo_type_max=$url_photo_type_o;}                                
+                                elseif (isset($url_photo_type_o)) {$url_photo_type_max=$url_photo_type_o;}
+                                elseif (isset($url_photo_type_m)) {$url_photo_type_max=$url_photo_type_m;}
+                                elseif (isset($url_photo_type_x)) {$url_photo_type_max=$url_photo_type_x;}                               
                                 else{dump('не найдена url для url_photo_type_max',$v_attachment);
                                 Log::channel($this->log_name)->error('не найдена url для url_photo_type_max',$v_attachment);
                                 }

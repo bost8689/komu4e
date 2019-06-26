@@ -22,7 +22,7 @@ class VK extends Controller
     	//пользователь
         static function usersGet($access_token,array $params,$data)
     {        
-    	usleep(200000);
+    	usleep(300000);
 	    $vk = new VKApiClient();
 	    try {	   
 	    $response = $vk->users()->get($access_token, $params);	    
@@ -43,7 +43,7 @@ class VK extends Controller
     //получение данных группы
     static function groupsGetById($access_token,$params,$data)
     { 
-    	usleep(200000);       
+    	usleep(300000);       
 	    $vk = new VKApiClient();	
 	    try {	   
 	    $response = $vk->groups()->getById($access_token,$params);
@@ -64,7 +64,7 @@ class VK extends Controller
     //удаление поста у группы
     static function wall_delete($access_token,array $params,array $data)
     {  
-    	usleep(200000);//  1000000 = 1 сек  
+    	usleep(300000);//  1000000 = 1 сек  
     	$vk = new VKApiClient();  
     	try { 
 			$response = $vk->wall()->delete($access_token, $params);
@@ -81,7 +81,7 @@ class VK extends Controller
     //блокировка пользователя в группе
     static function groups_ban($access_token,array $params,$data)
     {  
-    	usleep(200000);      
+    	usleep(300000);      
 	    $vk = new VKApiClient();
 	    try {	   
 	    $response = $vk->groups()->ban($access_token, $params);
@@ -105,7 +105,7 @@ class VK extends Controller
 	//получение url для загрузки фотографий
 	static function photosGetWallUploadServer($access_token,$params,$data)
     {    
-    	usleep(200000);    
+    	usleep(300000);    
 	    $vk = new VKApiClient();
 	    try { 
 			$response = $vk->photos()->getWallUploadServer($access_token,$params);
@@ -124,7 +124,7 @@ class VK extends Controller
 
 	static function requestUpload($params,$data)//type_file= photo
     {
-    	usleep(200000);
+    	usleep(300000);
     	$uploadUrl = $params['uploadUrl'];
     	$typeFile = $params['typeFile'];
     	$fileName = $params['fileName'];
@@ -146,7 +146,7 @@ class VK extends Controller
     //сохраняю загрузку фото
     static function photosSaveWallPhoto($access_token, $params,$data)
     {   
-    	usleep(200000); 	        
+    	usleep(300000); 	        
 	    $vk = new VKApiClient();
 	    try { 
 			$response = $vk->photos()->saveWallPhoto($access_token, $params);
@@ -185,7 +185,7 @@ class VK extends Controller
 
 	static function wallPost($access_token, $params,$data)
     {     
-    	usleep(200000);	    
+    	usleep(300000);	    
     	$vk = new VKApiClient();  
     	try { 
 			$response = $vk->wall()->post($access_token, $params);

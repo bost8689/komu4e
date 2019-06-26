@@ -64,12 +64,12 @@
           @endif          
           <div class="form-group">
           <button id="button_processing" type="submit" class="btn btn-primary" name=button_processing>Обработать</button>
-          <div class="checkbox">
+          {{--<div class="checkbox">
            <label>
             <input type="checkbox" name=checkbox_prosmotreno value=Просмотрено checked="checked">
             Пометить, как просмотренные
             </label>
-          </div>
+          </div>--}}
           </div>
           </form>
     </div>    

@@ -7,7 +7,7 @@
       <!-- контейнер-->
       <div class="col-sm-14">
         <div class="card">
-          <div class="card-header">Заказыы</div>
+          <div class="card-header">Заказы</div>
           <div class="card-body">          
             <form class="form-horizontal" role="form" method="POST" action="{{route('add_order')}}">
               {{csrf_field()}} 
@@ -80,9 +80,19 @@
         <div class="card-body">
           <form role="form" action="{{route('view_message')}}" method="post"> 
             {{csrf_field()}}
-            <div class="col-sm-14">
-              <button type="submit" class="btn btn-primary">Сообщения</button>
-            </div> 
+            <div class="form-group">
+              <div class="col-sm-14">
+                <select class="form-control" name="group_type">
+                  <option value=""></option>
+                  <option value="Объявления">Объявления</option>
+                  <option value="Городская">Городская</option>                      
+                </select>
+              </div> 
+            </div>           
+              <div class="col-sm-14">
+                <button type="submit" class="btn btn-primary">Сообщения</button>
+              </div>
+             
           </form>
         </div>
       </div>     

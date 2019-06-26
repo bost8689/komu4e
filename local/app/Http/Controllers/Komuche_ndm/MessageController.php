@@ -49,16 +49,32 @@ class MessageController extends Controller
     private $group_id_kndm = Null;
     private $token_group_kndm = Null;
 
-    public function __construct()
+    public function __construct(Request $request)
     {
         $this->token_moderator=config('vk.token_moderator');
-        $this->group_id_kndm=config('vk.group_id_kndm1');
-        $this->token_group_kndm=config('vk.token_group_kndm1');
+        switch ($request->input('group_type')) {
+        case 'Объявления':
+            $this->group_id_kndm=config('vk.group_id_kndm1');
+            $this->token_group_kndm=config('vk.token_group_kndm1');
+            break;
+        case 'Городская':
+            $this->group_id_kndm=config('vk.group_id_kndm2');
+            $this->token_group_kndm=config('vk.token_group_kndm2');
+            break;
+        default:            
+            break;
+        }  
     }
 
 
-	//отображение постов
-    public function view(Request $request){  
+	//отображение сообщений
+    public function view(Request $request){
+
+        if(empty($request->input('group_type'))){
+            return redirect()->route('home');
+        }
+
+        //dd($request->all()); 
         if($this->mode_debug) {dump('MessageController.view');}         
         if($this->log_write){Log::channel($this->log_name)->info('тест лог');}
         $c_peers = collect([]);    
@@ -67,7 +83,7 @@ class MessageController extends Controller
 
         $params = array(
         'offset' => 0,
-        'count' => 2, //по умолчанию 20, мах 200
+        'count' => 20, //по умолчанию 20, мах 200
         'filter' => 'unread',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
@@ -80,6 +96,7 @@ class MessageController extends Controller
         );
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
         //коллекция кол-во диалогов
+        $c_peers->put('group_type', $request->input('group_type'));
         $c_peers->put('countPeers', $messagesGetConversations['count']);
         foreach ($messagesGetConversations['items'] as $k_peer => $v_peer) { 
             //присвоение данных          
@@ -104,14 +121,15 @@ class MessageController extends Controller
 
                 //проверяю забанен ли пользователь
                 $params = array(             
-                'group_id' => $this->group_id_kndm,
+                'group_id' => config('vk.group_id_kndm1'),
                 'offset' => 0,
                 'count' => 1,// 
                 'fields' => 0,//1 – возвращать сообщения в хронологическом порядке. 0 – возвращать сообщения в обратном хронологическом порядке (по умолчанию).
                 'owner_id' => $userId,   
                 );
 
-                $getBanned = VK::groupsGetBanned($this->token_group_kndm,$params,Null);
+                $getBanned = VK::groupsGetBanned(config('vk.token_group_kndm1'),$params,Null);
+
                 if(isset($getBanned)){
                     $a_peers[$k_peer]['banUsersvk']=$getBanned['items'][0];    
                 }
@@ -206,6 +224,7 @@ class MessageController extends Controller
                             elseif (isset($url_photo_type_y)) {
                                 $url_photo_type_min=$url_photo_type_y;
                             }
+                            else{dump('не найдена url для url_photo_type_min',$v_attachments['photo']['sizes']);}
 
                             if(isset($url_photo_type_y)){
                                 $url_photo_type_max=$url_photo_type_y;
@@ -219,6 +238,13 @@ class MessageController extends Controller
                             elseif (isset($url_photo_type_o)) {
                                 $url_photo_type_max=$url_photo_type_o;
                             }  
+                            elseif (isset($url_photo_type_m)) {
+                                $url_photo_type_max=$url_photo_type_m;
+                            }
+                            elseif (isset($url_photo_type_x)) {
+                                $url_photo_type_max=$url_photo_type_x;
+                            }
+                            else{dump('не найдена url для url_photo_type_max',$v_attachments['photo']['sizes']);}
 
                             //добавил своё представление для вывода photo
                             $a_peers[$k_peer]['messages'][$k_history]['photo'][$k_attachments]['url_photo_type_min']=$url_photo_type_min;
@@ -234,19 +260,124 @@ class MessageController extends Controller
         if(!empty($a_peers)){
             $c_peers->put('peers',$a_peers);
         }  
-        if($this->mode_debug) { dump($c_peers); } 
+        if($this->mode_debug) { dump($c_peers); }         
         return view('komuche_ndm.messages.view_messages',['c_peers' => $c_peers]); 
         //dump($messagesGetHistory);
 
     } //end function update
 
     //обработка полученных данных
-    public function processingMessage(Request $request){
-        //if($this->mode_update) {dump('MessageController.processing');}   
-        dump($request->all());
+    public function processing_message(Request $request){
+        //if($this->mode_update) {dump('MessageController.processing');}  
+
+        //dd($request->input());
+        $messages=$request->input('messages');
+
+        foreach ($messages as $vMessage) {
+            $usersvkId = $vMessage['usersvk_id'];
+            $userId = $vMessage['user_id'];
+            //ищу этого пользователя
+            $Usersvk = Usersvk::find($usersvkId);
+            if(!isset($Usersvk)){ 
+                $params = array('user_ids' => $userId,'fields' => 'photo_100');
+                $usersGet = VK::usersGet($this->token_moderator,$params,Null);
+                $firstName = $usersGet[0]['first_name'];
+                $lastName = $usersGet[0]['last_name'];
+                $photo = $usersGet[0]['photo_100'];
+                $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);
+            }
+
+            if(!empty($vMessage['status'])){
+                switch ($vMessage['status']) {
+                    case 'Реквизиты':
+                        $message = '1. Перед каждой оплатой уточняйте реквизиты.                        
+                        2. В комментариях платежа ничего писать не надо.
+                        3. Для 2 типа размещения (постов от своего имени: ) После оплаты ожидайте от нас ответа, что Вас добавили в программу и только после этого можно будет размещать информацию, иначе программа заблокирует Вас.
+
+                        Газпромбанк 5264 8321 2715 3548 
+                        Сбербанк 5336 6900 1286 3579
+                        Яндекс деньги 4100 134 9075 1099
+
+                        4. После оплаты напишите, что отправили: сумму, на какую карту отправили и Имя отправителя.';
+                        $this->send_message(array('message' => $message),$Usersvk);                       
+                        break;
+                    case 'Прайс':
+                        $message = 'Информационный пост в сообществе "КомуЧё Объявления Надым" в социальной сети ВКонтакте, vk.com/komuche 
+
+                        Типы размещения:
+                        1. Закрепление записи в шапке группы. 1200 руб. на сутки. Никаких ссылок (ссылку можно только в комментариях под записью), только текст и картинка. Запись видна всем и в закреплении будет одна единственная ваша запись. Закрепление записи происходит в Прайм-тайм с 21:00 до 22:00.
+                        Оплату и информацию для закрепа просим предоставлять за 3 дня до размещения. Если материал и оплата не поступила за 3 дня мы в праве отменить бронирование. 
+
+                        2. Размещение одного информационного поста (с интервалом 1 сообщение в сутки) на стене от вашего имени, размещаете лично в удобное для вас время = 100 руб. Размещение не более одного раза в сутки. 
+
+                        3. Размещение одного рекламного поста на стене от имени группы в любое время (выбираете лично) = 390 руб. 
+
+                        4. Размещение визитки в фотоальбоме "Визитки" который будет виден при прямом просмотре группы В КомуЧё объявления и через меню группы. Стоимость размещения на один месяц 300 рублей. 
+
+                        Как сделать заказ? 
+                        1. После выбора типа размещения, высылаете номер типа размещения и вашу информацию, которую будете размещать для согласования. Запрещено размещать рекламу алкоголя, табака, информацию сексуального характера, а так же нарушающую ФЗ "О рекламе" и правила "ВКонтакте"
+                        2. После согласования информации Вам высылают реквизиты на оплату. 
+                        Способы оплаты удобным для Вас способом: 
+                        Перевод денежных средств на карту Сбербанк, Газпромбанк, Yandex деньги. 
+
+                        Дополнительные наши услуги: 
+                        1. Оформление групп, а так же их ведение. 
+                        5. Услуги автоматизации обработки информации в социальных группах. Интернет-магазинов. 
+
+                        С Уважением команда КомуЧё';
+                        $this->send_message(array('message' => $message),$Usersvk); 
+                        break;
+                    case 'ПринятьВГруппу':
+                        //code принять в группу 
+
+                        // $message = 'ПринятьВГруппу';
+                        // $this->send_message(array('message' => $message),$Usersvk); 
+                        break;
+                    case 'Разблокировать': 
+                        //code Разблокировать                       
+                        // $message = 'Разблокировали';
+                        // $this->send_message(array('message' => $message),$Usersvk);
+                        break; 
+                    case 'ОшибкаГруппой': 
+                        //code Разблокировать                       
+                        $message = 'Здравствуйте, вы написали к нам в сообщения сообщества , объявления размещать надо на стене в сообществе КомуЧё Объявления - https://vk.com/komuche.
+                        С Уважением команда КомуЧё 
+                        Наши сообщества: 
+                        КомуЧё Надым - городское сообщество. vk.com/komuche_nadym 
+                        КомуЧё Авто - попутчики, грузо и пассажироперевозки 
+                        https://vk.com/auto_nadym 
+                        КомуЧё Потеряшка - бюро находок и потерь https://vk.com/bnip_nadym 
+                        КомуЧё Мамочки 
+                        https://vk.com/komuche_mamomochki 
+                        КомуЧё Объявления - https://vk.com/komuche';
+                        $this->send_message(array('message' => $message),$Usersvk); 
+                        break;                     
+                    default:
+                        dump([$vMessage,'status'=>$vMessage['status'],'неизвестный status']);
+                        break;
+                }
+                dump([$vMessage,'status'=>$vMessage['status'],'']);
+            }
+            else{
+                //dump([$vMessage,$vMessage['status'],'Статус empty']);
+            }
+
+            if(!empty($vMessage['text_send'])){                
+                $this->send_message(array('message' => $vMessage['text_send']),$Usersvk);
+            } 
+
+        }
+        return redirect()->route('home'); 
+
     }
-    //поиск
-    public function find(Request $request){
-        //if($this->mode_update) {dump('MessageController.find');}   
+    public function send_message(array $arrData,$Usersvk){
+        $params = array(             
+            'user_id' => $Usersvk->user_id,
+            'message' => $arrData['message'], //220409092 Вячеслав Тихонов
+            'random_id'=> rand(), //рандомное число
+            //'group_ids' => $group_ids,    
+        );
+        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);       
     }
+
 }//end class
