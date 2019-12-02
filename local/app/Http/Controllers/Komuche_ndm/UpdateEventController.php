@@ -4,13 +4,15 @@ namespace Komu4e\Http\Controllers\Komuche_ndm;
 set_time_limit(180);
 use Illuminate\Http\Request;
 
+//контроллеры
 use Komu4e\Http\Controllers\Controller;
-use Komu4e\Http\Controllers\Komuche_ndm\PostmessageController;
+use Komu4e\Http\Controllers\Komuche_ndm\PostmessageController; 
 use Komu4e\Http\Controllers\VK;
 
-
+//БД 
 use Komu4e\Model\Komuche_ndm\Settings;
 
+//дополнительное подключени
 use Komu4e\User;
 use Auth;
 use Log;
@@ -30,53 +32,60 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 class UpdateEventController extends Controller
 {	
     public $log_write = 0; //публикация логов //if($this->log_write){}
-    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
     public function updateEvent(Request $request){
 
-        if($this->mode_debug){dump('*** UpdateEventController.updateEvent',$request->all());}        
-
         $token_moderator=config('vk.token_moderator');
         $group_id_kndm1=config('vk.group_id_kndm1');
 
+        //Получение новых событий
         $vk = new VKApiClient(); 
         $LongPollServer = $vk->groups()->getLongPollServer($token_moderator, array( 
           'group_id' => $group_id_kndm1, 
         ));
         $last_ts['ts']=$LongPollServer['ts']; //получили настройки и последние сессии
-        $Setting_last_ts = Settings::where('name','komuche_ndm_postemessage_last_ts')->first();
-        //test
-                
-        if($this->mode_debug){dump('$komuche_ndm_postemessage_last_ts'); dump($Setting_last_ts); }
+        $Setting_last_ts = Settings::where('name','komu4e_ndm_postmessage_last_ts')->first();
         $countNewTs = $last_ts['ts']-$Setting_last_ts->value1; //кол-во новый событий
+
+        //Если долго не модерировалась - для обновления
         if($request->has('btn_update_event')){ //если обновить, то последние
             $beginTs = $last_ts['ts']-50;
         }
         else{            
             $beginTs = $last_ts['ts']-$countNewTs;    
-        }     
-        if($this->mode_debug){dump('Количество новых событий $countNewTs='); dump($countNewTs); }
-        if($this->mode_debug){dump('$LongPollServer',$LongPollServer);Log::channel($this->log_name)->info('LongPollServer',$LongPollServer);}
+        }   
         
+        //Получение настроек и событий от ВК
         $handler = new CallbackApiMyHandler();          
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);
-        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs); //$countNewTs получить последние 2 записи
-        if($this->mode_debug){dump(['$result_executor'=>$result_executor]);}
+        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs); 
 
-        
+        //Отладка
+        if($this->mode_debug){dump([
+            'Отладка'=>'UpdateEventController.updateEvent',
+            'Последнее число событий в БД Setting_last_ts'=>$Setting_last_ts->value1,
+            'Последнее число событий в ВК $last_ts[ts]'=>$last_ts['ts'],
+            'Кол-во новыйх событий $countNewTs'=>$countNewTs,
+            'Настройки сервера LongPollServer'=>$LongPollServer,
+            'События $result_executor'=>$result_executor,
+        ]);}
+
         //перебираем последние события
         $PostmessageController = new PostmessageController();
 
         foreach ($result_executor['updates'] as $k_updates => $v_updates) {
             
-            if($this->mode_debug){dump('№события=',$k_updates+1);}
-            if($this->mode_debug){dump('$v_updates',$v_updates);}
+            //if($this->mode_debug){dump('№события=',$k_updates+1);}
+            //if($this->mode_debug){dump('$v_updates',$v_updates);}
 
             if ($v_updates['type']=='wall_post_new') { //новый пост
-                if($this->log_write){Log::channel($this->log_name)->info('wall_post_new - $v_updates',$v_updates);}                
-                $PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
+
+                //if($this->log_write){Log::channel($this->log_name)->info('wall_post_new - $v_updates',$v_updates);}  
+
+                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
             }
             elseif($v_updates['type']=='wall_reply_new'){                
                 if($this->log_write){Log::channel($this->log_name)->info('wall_reply_new - $v_updates',$v_updates);}  
