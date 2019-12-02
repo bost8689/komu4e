@@ -46,94 +46,71 @@ class UpdateEventController extends Controller
         $LongPollServer = $vk->groups()->getLongPollServer($token_moderator, array( 
           'group_id' => $group_id_kndm1, 
         ));
-        $last_ts['ts']=$LongPollServer['ts']; //получили настройки и последние сессии
-        $Setting_last_ts = Settings::where('name','komu4e_ndm_postmessage_last_ts')->first();
-        $countNewTs = $last_ts['ts']-$Setting_last_ts->value1; //кол-во новый событий
+        $lastTs=$LongPollServer['ts']; //получили настройки и последние сессии
+        $SettingLastTs = Settings::where('name','komu4e_ndm_postmessage_last_ts')->first();
+        $settingBeginTs = $SettingLastTs->value1; //на начало было
+        $countNewTs = $lastTs-$SettingLastTs->value1; //кол-во новый событий
 
         //Если долго не модерировалась - для обновления
         if($request->has('btn_update_event')){ //если обновить, то последние
-            $beginTs = $last_ts['ts']-50;
+            $beginTs = $lastTs-50;
         }
         else{            
-            $beginTs = $last_ts['ts']-$countNewTs;    
+            $beginTs = $lastTs-$countNewTs;    
         }   
         
         //Получение настроек и событий от ВК
         $handler = new CallbackApiMyHandler();          
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);
-        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs); 
+        $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs);         
+
+        //перебираем последние события
+        //Формирую массивы событий по их типу
+        $wallPostNew = array();
+        $wallReplyNew = array();
+        $wallReplyEdit = array();
+        foreach ($result_executor['updates'] as $k_updates => $v_updates) {
+            switch ($v_updates['type']) {
+                case 'wall_post_new':
+                    $wallPostNew[]=$v_updates;
+                    break;
+                case 'wall_reply_new':
+                    $wallReplyNew[]=$v_updates;
+                    break;
+                case 'wall_reply_edit':
+                    $wallReplyEdit[]=$v_updates;
+                    break;                
+                default:
+                    //dump('Неизвестный тип поста $v_updates[type]',$v_updates['type']);
+                    //Log::channel($this->log_name)->error('Неизвестный тип поста - $v_updates[type]',[$v_updates['type']]);
+                    break;
+            }            
+        }    
+
+        //Обновляю последнюю запись события в БД
+        $SettingLastTs->value1=$lastTs;
+        $SettingLastTs->save();        
 
         //Отладка
         if($this->mode_debug){dump([
             'Отладка'=>'UpdateEventController.updateEvent',
-            'Последнее число событий в БД Setting_last_ts'=>$Setting_last_ts->value1,
-            'Последнее число событий в ВК $last_ts[ts]'=>$last_ts['ts'],
+            'Последнее число событий в БД на начало $settingBeginTs'=>$settingBeginTs,
+            'Последнее число событий в ВК $lastTs'=>$lastTs,
             'Кол-во новыйх событий $countNewTs'=>$countNewTs,
             'Настройки сервера LongPollServer'=>$LongPollServer,
             'События $result_executor'=>$result_executor,
-        ]);}
+            'Кол-во новых $wallPostNew'=>count($wallPostNew),
+            'Последнее число событий в БД на конец SettingLastTs'=>$SettingLastTs->value1,
+        ]);}    
 
-        //перебираем последние события
-        $PostmessageController = new PostmessageController();
+        //Запускаю функцию записи новых постов
+        if (!empty($wallPostNew)) {
+            $PostmessageController = new PostmessageController(); 
+            $PostmessageController->wallPostNew($wallPostNew);
+        }          
 
-        foreach ($result_executor['updates'] as $k_updates => $v_updates) {
-            
-            //if($this->mode_debug){dump('№события=',$k_updates+1);}
-            //if($this->mode_debug){dump('$v_updates',$v_updates);}
+        //return redirect()->route('home');
 
-            if ($v_updates['type']=='wall_post_new') { //новый пост
-
-                //if($this->log_write){Log::channel($this->log_name)->info('wall_post_new - $v_updates',$v_updates);}  
-
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            }
-            elseif($v_updates['type']=='wall_reply_new'){                
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_new - $v_updates',$v_updates);}  
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));                    
-            }
-            elseif($v_updates['type']=='wall_reply_edit'){                
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_edit - $v_updates',$v_updates);}
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            } 
-            elseif($v_updates['type']=='user_unblock'){                
-                if($this->log_write){Log::channel($this->log_name)->info('user_unblock - $v_updates',$v_updates);}
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            }
-            elseif($v_updates['type']=='user_block'){                
-                if($this->log_write){Log::channel($this->log_name)->info('user_block - $v_updates',$v_updates);}
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            }
-            elseif($v_updates['type']=='wall_reply_delete'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            }
-            elseif($v_updates['type']=='wall_reply_restore'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-                //$PostmessageController->updatePostmessage(array('k_updates' => $k_updates+1,'v_updates' => $v_updates ));
-            }            
-            elseif($v_updates['type']=='group_join'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-            }
-            elseif($v_updates['type']=='group_leave'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-            }            
-            elseif($v_updates['type']=='message_new'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-            }
-            elseif($v_updates['type']=='message_reply'){               
-                if($this->log_write){Log::channel($this->log_name)->info('wall_reply_delete - $v_updates',$v_updates);}
-            }
-
-            
-            else{
-                dump('Неизвестный тип поста $v_updates[type]',$v_updates['type']);
-                Log::channel($this->log_name)->error('Неизвестный тип поста - $v_updates[type]',[$v_updates['type']]);
-                Log::channel($this->log_name)->error('array $v_updates',[$v_updates]);                      
-            }
-        }
-        $Setting_last_ts->value1=$last_ts['ts'];
-        $Setting_last_ts->save();
-        return redirect()->route('home');       
     } //end function update
 
 }//end class
