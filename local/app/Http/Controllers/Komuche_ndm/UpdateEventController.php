@@ -106,7 +106,7 @@ class UpdateEventController extends Controller
         //Запускаю функцию записи новых постов
         if (!empty($wallPostNew)) {
             $PostmessageController = new PostmessageController(); 
-            $PostmessageController->wallPostNew($wallPostNew);
+            $PostmessageController->writeWallPostNew($wallPostNew);
         }          
 
         //return redirect()->route('home');

@@ -103,13 +103,13 @@ class PostmessageController extends Controller
         //создаю коллекцию постов по уникальным полльзователея
         $collectPostmessages = collect([]);
         foreach ($collectUsersvk as $k_usersvk => $v_usersvk) {
-            if (isset($checkbox_all)) {
+            if (isset($checkbox_all)) { //если хочу показать (все - обработанные и не обработанные), независимо от статуса
                 $Postmessages=Postmessage::with('photospostmessage','user')->where('usersvk_id',$v_usersvk['id'])->whereBetween('date', [$date_view_wall.' 00:00:00',$date_view_wall.' 23:59:59'])->orderBy('date', 'desc')->get();
             }
-            elseif (isset($checkbox_status_is)) {
+            elseif (isset($checkbox_status_is)) { //если хочу показать (обработанные), то только которые содержат статус
                 $Postmessages=Postmessage::with('photospostmessage','user')->where('usersvk_id',$v_usersvk['id'])->whereBetween('date', [$date_view_wall.' 00:00:00',$date_view_wall.' 23:59:59'])->orderBy('date', 'desc')->get();
             }
-            else{
+            else{ //если хочу показать (не обработанные), которые не содержать статус
                 $Postmessages=Postmessage::with('photospostmessage','user')->where('usersvk_id',$v_usersvk['id'])->where('status',Null)->whereBetween('date', [$date_view_wall.' 00:00:00',$date_view_wall.' 23:59:59'])->orderBy('date', 'desc')->get();
             }
             $collectPostmessages->push(['Usersvk' => Usersvk::where('id','=',$v_usersvk['id'])->first(),'Orders' => Order::where('usersvk_id','=',$v_usersvk['id'])->where('status','=',Null)->get(),'Postmessages' => $Postmessages]);
@@ -128,13 +128,14 @@ class PostmessageController extends Controller
     } //end function view
 
     //обновление
-    public function wallPostNew(array $wallPostNew){ //входят обновления updates из UpdateEventController
-            dump($wallPostNew);
+    public function writeWallPostNew(array $wallPostNew){ //входят обновления updates из UpdateEventController
+            
             //объявление пременных
             $token_moderator=config('vk.token_moderator');
         	$group_id_kndm1=config('vk.group_id_kndm1');  
         	$countAddDBPostmessage = 0;
         	$countAddDBUsersvk = 0;
+            $countAddDBPhotosPost = 0;
 
             //перебираю посты
             foreach ($wallPostNew as $wallPostNew) {
@@ -223,7 +224,7 @@ class PostmessageController extends Controller
                                             $url_photo_type_r = $v_sizes['url'];//"width":320,"height":240
                                         }
                                         else{
-                                            Log::channel($this->log_name)->error('неизвестный тип для фото $wallPostNew',$wallPostNew);
+                                            //Log::channel($this->log_name)->error('неизвестный тип для фото $wallPostNew',$wallPostNew);
                                             dump('неизвестный type photo $wallPostNew',$wallPostNew);
                                         }
                                     }
@@ -235,7 +236,7 @@ class PostmessageController extends Controller
                                         elseif (isset($url_photo_type_r)) {$url_photo_type_min=$url_photo_type_r;}
                                         elseif (isset($url_photo_type_y)) {$url_photo_type_min=$url_photo_type_y;}
                                         else{dump('не найдена url для url_photo_type_min',$v_attachment);
-                                        Log::channel($this->log_name)->error('не найдена url для url_photo_type_min',$v_attachment);
+                                        //Log::channel($this->log_name)->error('не найдена url для url_photo_type_min',$v_attachment);
                                     }
 
                                     if(isset($url_photo_type_y)){
@@ -246,10 +247,11 @@ class PostmessageController extends Controller
                                     elseif (isset($url_photo_type_m)) {$url_photo_type_max=$url_photo_type_m;}
                                     elseif (isset($url_photo_type_x)) {$url_photo_type_max=$url_photo_type_x;}                               
                                     else{dump('не найдена url для url_photo_type_max',$v_attachment);
-                                    Log::channel($this->log_name)->error('не найдена url для url_photo_type_max',$v_attachment);
+                                    //Log::channel($this->log_name)->error('не найдена url для url_photo_type_max',$v_attachment);
                                     }
                                     //записываю новую фотку
                                     $Photospostmessage = Photospostmessage::create(['filenamemax'=>Null,'pathmax'=>Null,'typemax'=>Null,'photomax_url'=>$url_photo_type_max,'filenamemin'=>Null,'pathmin'=>Null,'typemin'=>Null,'photomin_url'=>$url_photo_type_min,'postmessage_id'=>$Postmessage->id]);
+                                    $countAddDBPhotosPost++;
                                 }                            
                             }  
                         }
@@ -257,13 +259,15 @@ class PostmessageController extends Controller
                 }
             }
             $resultWallPostNew['countAddDBPostmessage'] = $countAddDBPostmessage;
-            $resultWallPostNew['$countAddDBUsersvk'] = $countAddDBUsersvk;
+            $resultWallPostNew['countAddDBUsersvk'] = $countAddDBUsersvk;
 
             //Отладка
             if($this->mode_debug){dump([
-                'Отладка'=>'PostmessageController.wallPostNew',            
+                'Отладка'=>'PostmessageController.writeWallPostNew',                        
+                'Входящие данные $wallPostNeW'=>$wallPostNew,
                 'Кол-во новых записанных постов countAddDBPostmessage'=>$countAddDBPostmessage,
                 'Кол-во новых записанных полльзователей countAddDBUsersvk'=>$countAddDBUsersvk,
+                'Кол-во новых записанных фотографий countAddDBPhotosPost'=>$countAddDBPhotosPost,
             ]);}
 
             return $resultWallPostNew;
