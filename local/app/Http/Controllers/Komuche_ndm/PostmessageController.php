@@ -54,15 +54,15 @@ use Intervention\Image\ImageManager;
 
 class PostmessageController extends Controller
 {	
-    public $mode_update = 1; //обновление перед показом включено //if($this->mode_update){}
+    //public $mode_update = 1; //обновление перед показом включено //if($this->mode_update){}
     public $log_write = 1; //публикация логов //if($this->log_write){}
     public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_postmessage'; //публикация логов //if($this->log_name){}
     private $group_id_kndm1 = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
-    public $mode_banUsersvk = 1;
+    public $mode_banUsersvk = 1; //включена блокировка
     
-        public function __construct()
+    public function __construct()
     {
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm1=config('vk.group_id_kndm1');
@@ -128,17 +128,17 @@ class PostmessageController extends Controller
     } //end function view
 
     //обновление
-    public function writeWallPostNew(array $wallPostNew){ //входят обновления updates из UpdateEventController
+    public function writeWallPostNew(array $wallPostNews){ //входят обновления updates из UpdateEventController
             
             //объявление пременных
-            $token_moderator=config('vk.token_moderator');
-        	$group_id_kndm1=config('vk.group_id_kndm1');  
+         //    $token_moderator=config('vk.token_moderator');
+        	// $group_id_kndm1=config('vk.group_id_kndm1');  
         	$countAddDBPostmessage = 0;
         	$countAddDBUsersvk = 0;
             $countAddDBPhotosPost = 0;
 
             //перебираю посты
-            foreach ($wallPostNew as $wallPostNew) {
+            foreach ($wallPostNews as $wallPostNew) {
                 if ($wallPostNew['type']=='wall_post_new') { //новый пост
                     //проверяем есть ли такой пост у меня в базе                
                     //если нет заносим в базу данных             
@@ -147,14 +147,14 @@ class PostmessageController extends Controller
                     		$userId = $wallPostNew['object']['from_id'];
                     		if ($wallPostNew['object']['from_id']>0) {
                     			$params = array('user_ids' => $userId,'fields' => 'photo_100');
-                    		    $usersGet = VK::usersGet($token_moderator,$params,Null);                		    
+                    		    $usersGet = VK::usersGet($this->token_moderator,$params,Null);                		    
                     		    $firstName = $usersGet[0]['first_name'];
                     		    $lastName = $usersGet[0]['last_name'];
                     		    $photo = $usersGet[0]['photo_100'];
                     		} 
                     		else{
                     			$params = array('group_id' => abs($wallPostNew['object']['from_id']),'fields' => '');
-                    			$groupsGetById = VK::groupsGetById($token_moderator,$params,Null);   
+                    			$groupsGetById = VK::groupsGetById($this->token_moderator,$params,Null);   
                     			dump($groupsGetById);       
                        			$firstName = $groupsGetById[0]['name'];              
                        			$lastName = Null;
@@ -162,17 +162,17 @@ class PostmessageController extends Controller
                     		}
                             //поиск и добавление нового пользователя ВК
                             $Usersvk = Usersvk::where('user_id',$userId)->first();
-                            if(!isset($Usersvk)){ 
+                            if(!isset($Usersvk)){ //если нет такого пользователя, то создаём
                             	$Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);
                             	$countAddDBUsersvk++;
                             }                        	
-                            else{ 
+                            else{ //если есть такой пользователь, то обновляем фото
                                 $Usersvk->photo = $photo;
                                 $Usersvk->save();
                             }                    
                         
                         //создаю новый объект в БД
-                        $Postmessage = Postmessage::create(['source_id'=>$wallPostNew['object']['id'],'usersvk_id'=>$Usersvk->id,'text'=>$wallPostNew['object']['text'],'date'=>date('Y-m-d H:m:s',$wallPostNew['object']['date']),'user_id'=>1,'status'=>Null,'type_status'=>Null]);
+                        $Postmessage = Postmessage::create(['source_id'=>$wallPostNew['object']['id'],'usersvk_id'=>$Usersvk->id,'text'=>$wallPostNew['object']['text'],'date'=>date('Y-m-d H:m:s',$wallPostNew['object']['date']),'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>Null]);
                         $countAddDBPostmessage++;
 
                         //перебираю фото этого поста
@@ -245,7 +245,7 @@ class PostmessageController extends Controller
                                     elseif (isset($url_photo_type_w)) {$url_photo_type_max=$url_photo_type_w;}
                                     elseif (isset($url_photo_type_o)) {$url_photo_type_max=$url_photo_type_o;}
                                     elseif (isset($url_photo_type_m)) {$url_photo_type_max=$url_photo_type_m;}
-                                    elseif (isset($url_photo_type_x)) {$url_photo_type_max=$url_photo_type_x;}                               
+                                    elseif (isset($url_photo_type_x)) {$url_photo_type_max=$url_photo_type_x;}
                                     else{dump('не найдена url для url_photo_type_max',$v_attachment);
                                     //Log::channel($this->log_name)->error('не найдена url для url_photo_type_max',$v_attachment);
                                     }
@@ -258,26 +258,26 @@ class PostmessageController extends Controller
                     }
                 }
             }
-            $resultWallPostNew['countAddDBPostmessage'] = $countAddDBPostmessage;
-            $resultWallPostNew['countAddDBUsersvk'] = $countAddDBUsersvk;
+            // $resultWallPostNew['countAddDBPostmessage'] = $countAddDBPostmessage;
+            // $resultWallPostNew['countAddDBUsersvk'] = $countAddDBUsersvk;
 
             //Отладка
             if($this->mode_debug){dump([
                 'Отладка'=>'PostmessageController.writeWallPostNew',                        
-                'Входящие данные $wallPostNeW'=>$wallPostNew,
+                'Входящие данные $wallPostNeWs'=>$wallPostNews,
                 'Кол-во новых записанных постов countAddDBPostmessage'=>$countAddDBPostmessage,
                 'Кол-во новых записанных полльзователей countAddDBUsersvk'=>$countAddDBUsersvk,
                 'Кол-во новых записанных фотографий countAddDBPhotosPost'=>$countAddDBPhotosPost,
             ]);}
-
-            return $resultWallPostNew;
+            return;
+            // return $resultWallPostNew;
     } //end function update
 
     //обработка полученных данных
     public function processing(Request $request){
-        $token_moderator=config('vk.token_moderator');
-        $group_id_kndm1=config('vk.group_id_kndm1');
-        $countPostCommand=array('Удалить' => 0,'Реклама' => 0,'Повтор' => 0,'Ссылка' => 0,'Более3' => 0,'Найдено' => 0,'Потеряно' => 0,'Заказ' => 0);    
+        // $token_moderator=config('vk.token_moderator');
+        // $group_id_kndm1=config('vk.group_id_kndm1');
+        $countPostCommand=array('Удалить' => 0,'Реклама' => 0,'Повтор' => 0,'Ссылка' => 0,'Более3' => 0,'Найдено' => 0,'Потеряно' => 0,'Заказ' => 0,'Просмотрено'=>0);    
         
         //перебираю полученные данные
         foreach ($request->input('processing') as $k_processing => $v_processing) {
@@ -332,32 +332,32 @@ class PostmessageController extends Controller
                     $this->savePhoto(array('type'=>$command,'Bnip'=>$Bnip),$Postmessage);
                     $countPostCommand[$command]++;
                 }
-                elseif($command=='Заказ'){                    
-                    if($this->mode_debug){dump('Тут команда Заказ',$postmessage_id,$command);dump('$v_processing[Orders]',$v_processing['Orders']);}
+                elseif($command=='Заказ'){  
                     //кол-во заказов
                     $count_orders = count($v_processing['Orders']);
                     foreach ($v_processing['Orders'] as $k_order => $v_order) {                        
                         if($k_order==$count_orders-1) { //если это последний заказ
                             $Order = Order::where('id',$v_order['id'])->first();
-                            if($this->mode_debug){dump('заказ до',$Order);}
+                            //if($this->mode_debug){dump('заказ до',$Order);}
                             $Order->executed=$Order->executed+1;
                             if($Order->executed>=$Order->ordered){
                                 $Order->status='Выполнен';                                
                             }                            
                             $Order->save();                            
-                            if($this->mode_debug){dump('заказ после',$Order);}
+                            //if($this->mode_debug){dump('заказ после',$Order);}
                         }                      
                     }                    
                     $Postmessage->status=$command;
                     $Postmessage->type_status=$Order->id;
                     $this->savePhoto(array('type'=>$command),$Postmessage);
-                    $countPostCommand[$command]++;
+                    $countPostCommand[$command]++;                    
                 }
                 else {
                     //стоит галочка просмотрено
                     if (!empty($request->input('checkbox_prosmotreno'))) {
                         if ($Postmessage->status==Null) { //чтобы стараые команды не перезаписывались
                             $Postmessage->status='Просмотрено';
+                            $countPostCommand['Просмотрено']++;
                         }                            
                     }
                 }
