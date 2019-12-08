@@ -3,6 +3,18 @@
 
 @section('main')        
           <div class="col-sm-8"> 
+            <div class="card">
+                <div class="card-header">   
+                Кол-во заказов               
+                </div>
+                <div class="card-body">
+                  @foreach ($profit as $nameProfit => $valueProfit)
+                  {{$nameProfit }} {{$valueProfit}} <br>
+                  @endforeach                 
+                  <hr>
+                </div> 
+              </div>
+              <hr>
               <form role="form" action="{{route('delete_order')}}" method=POST>
               {{ csrf_field() }}
               @foreach($Orders as $Order)
@@ -16,7 +28,7 @@
                   <div class="checkbox">
                     <label>                  
                     <input type="checkbox" name="order_id[{{$loop->index}}]" value="{{$Order->id}}">
-                    Заказ №{{$Order->id}} :
+                    Заказ №{{$Order->id}} {{date("d-m-Y", strtotime($Order->created_at))}}
                     Заказано {{$Order->ordered}} :
                     Выполнено {{$Order->executed}}                  
                     </label>
