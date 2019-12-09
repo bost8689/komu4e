@@ -26,7 +26,7 @@
         <div class="card-body">
           @if ($collectPostmessage['Orders']->count())
             <div class="alert alert-danger" role="alert">
-              Внимание рекламодатель!<p>          
+              <span class="badge badge-danger">Внимание рекламодатель!<p></span>                        
               @foreach ($collectPostmessage['Orders'] as $Order)
                 Заказ №{{$Order->id }} : Заказано {{$Order->ordered}} : Выполнено {{$Order->executed}}<p> 
                 <input  type="hidden" name="processing[{{$loop->parent->index}}][Orders][{{$loop->index}}][id]" value="{{$Order->id}}">
@@ -35,7 +35,23 @@
           @endif 
           
           @foreach($collectPostmessage['Postmessages'] as $Postmessage)
-            <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a> {{$Postmessage->status}} @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif          
+            
+{{-- Красим слова --}}
+            @if ($Postmessage->status == "Найдено" or $Postmessage->status == "Потеряно")
+            <span class="badge badge-warning">
+              <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
+              {{$Postmessage->status}}
+              @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif 
+            </span>
+            @elseif ($Postmessage->status == "Удалить")
+            <span class="badge badge-danger">
+              <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
+              {{$Postmessage->status}}
+              @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif 
+            </span>
+            @endif
+
+
             <br>
             {{$Postmessage->text}}<br>
             @foreach($Postmessage->photospostmessage as $Photopostmessage)

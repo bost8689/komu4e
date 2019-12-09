@@ -71,11 +71,12 @@
             <option value=Разное>Разное</option>
             </select>         
           @endforeach 
+          
           Список постов пользователя, которые были опубликованы ...<br>
           @if(isset($v_Bnips['Bnips']['cBnipTypeStatusIs']))
             @foreach($v_Bnips['Bnips']['cBnipTypeStatusIs'] as $k_BnipTypeStatusIs => $BnipTypeStatusIs)
               {{$BnipTypeStatusIs->created_at}}<br>
-              {{$BnipTypeStatusIs->status}}-{{$BnipTypeStatusIs->type_status}}
+              {{$BnipTypeStatusIs->status}}-{{$BnipTypeStatusIs->type_status}}<br>
               {{$BnipTypeStatusIs->text}}
               <br>
               @foreach($BnipTypeStatusIs->Photosbnip as $PhotoBnip)

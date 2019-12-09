@@ -241,7 +241,8 @@ class BnipController extends Controller
             'random_id'=> rand(), //рандомное число
             //'group_ids' => $group_ids,    
         );
-        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);       
+        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null); 
+        return $messagesSend;
     }
    
 }//end class
