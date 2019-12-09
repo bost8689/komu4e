@@ -8,10 +8,13 @@
                 Кол-во заказов               
                 </div>
                 <div class="card-body">
-                  @foreach ($profit as $nameProfit => $valueProfit)
-                  {{$nameProfit }} {{$valueProfit}} <br>
+                  @foreach ($Profit['profitThisMonth'] as $nameProfit => $valueProfit)
+                  {{$nameProfit}} {{$valueProfit}} <br>
                   @endforeach                 
                   <hr>
+                  @foreach ($Profit['profitBackMonth'] as $nameProfit => $valueProfit)
+                  {{$nameProfit}} {{$valueProfit}} <br>
+                  @endforeach 
                 </div> 
               </div>
               <hr>

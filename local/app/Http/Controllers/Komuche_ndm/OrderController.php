@@ -32,30 +32,21 @@ class OrderController extends Controller
     public function view(Request $request)
     {  
         $debug = array('Отладка'=>'OrderController.view');
-        $profit = array();
-        //whereBetween('date', [$date_view_wall.' 00:00:00',$date_view_wall.' 23:59:59'])
-        // $date = date('d.m.Y',time());
-        // $OrdersThisMonth = Order::with('Usersvk')->whereBetween('date', [$date_view_wall.' 00:00:00',$date_view_wall.' 23:59:59'])->where('status',Null)->get();
-        $OrdersThisMonth = Order::orderBy('created_at', 'desc')->where('created_at','>',date('Y-m-01 00:00:00'))->get();        
-        $profit['Посты от своего имени в этом месяце']='';
-        $profit['Заказов в этом месяце']=$OrdersThisMonth->sum('ordered');
-        $profit['Выполнено в этом месяце']=$OrdersThisMonth->sum('executed');
-        $profit['Выручка в этом месяце']=$OrdersThisMonth->sum('ordered')*100;
-        $OrdersBackMonth = Order::orderBy('created_at', 'desc')->where('created_at','>',date('Y-m-01 00:00:00',strtotime("-1 month")))->where('created_at','<',date('Y-m-01 00:00:00'))->get();
-        $profit['Посты от своего имени в прошлом месяце']='';
-        $profit['Заказов в прошлом месяце']=$OrdersBackMonth->sum('ordered');
-        $profit['Выполнено в прошлом месяце']=$OrdersThisMonth->sum('executed');
-        $profit['Выручка в прошлом месяце']=$OrdersBackMonth->sum('ordered')*100;
         
         $Orders = Order::with('Usersvk')->where('status',Null)->get();               
         //Отладка
         if($this->mode_debug){
             $debug['Заказы $Orders']=$Orders;
-            $debug['Заказы в этом месяце $OrdersThisMonth'] = $OrdersThisMonth;
-            $debug['Заказы месяц назад $OrdersBackMonth'] = $OrdersBackMonth;
             dump($debug);
         }  
-        return view('komuche_ndm.order.view_order',['Orders'=>$Orders,'profit'=>$profit,]);
+
+        //подключаю прибыль и получаю значения
+        $ProfitController = new ProfitController();
+        $Profit=array();
+        $Profit['profitThisMonth']=$ProfitController->profitGetThisMonth();
+        $Profit['profitBackMonth']=$ProfitController->profitGetBackMonth();
+
+        return view('komuche_ndm.order.view_order',['Orders'=>$Orders,'Profit'=>$Profit]);
         
     }
     //обработка выбора из списка какой заказ добавить

@@ -10,7 +10,7 @@
       @endif
       <form role="form" action="{{route('processingBnip')}}" method=POST>
       {{ csrf_field() }}  
-      @foreach($c_Bnips as $v_Bnips)
+      @foreach($cBnips as $v_Bnips)
       <div class="card">
         <div class="card-header">
           <a href=https://vk.com/id{{$v_Bnips['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя">
@@ -18,9 +18,9 @@
           <a href=https://vk.com/id{{$v_Bnips['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя id{{$v_Bnips['Usersvk']->user_id}}" >{{$v_Bnips['Usersvk']->firstname}} {{$v_Bnips['Usersvk']->lastname}}</a>
         </div>
         <div class="card-body">
-          @foreach($v_Bnips['Bnips']['c_bnipTypeStatusNull'] as $k_BnipTypeStatusNull => $BnipTypeStatusNull)
+          @foreach($v_Bnips['Bnips']['cBnipTypeStatusNull'] as $k_BnipTypeStatusNull => $BnipTypeStatusNull)
             {{$BnipTypeStatusNull->created_at}}<br>
-            {{$BnipTypeStatusNull->text}}
+            {{$BnipTypeStatusNull->text}}            
             <br>
             @foreach($BnipTypeStatusNull->Photosbnip as $PhotoBnip)
               <a href={{$PhotoBnip->pathmax}}{{$PhotoBnip->filenamemax}} target=_blank title="Просмотреть фото">
@@ -33,21 +33,29 @@
               <option value=Найдено selected>Найдено</option>
               <option value=Потеряно>Потеряно</option>
               <option value=Удалить>Удалить</option>
+              <option value=Повтор>Повтор</option>
+              <option value=ОшибкаГруппой>Ошибка Группой</option>
             @elseif($BnipTypeStatusNull->status=='Потеряно') 
               <option value=""></option>
               <option value=Найдено>Найдено</option>
               <option value=Потеряно selected>Потеряно</option>
               <option value=Удалить>Удалить</option>
+              <option value=Повтор>Повтор</option>
+              <option value=ОшибкаГруппой>Ошибка Группой</option>
             @elseif($BnipTypeStatusNull->status=='Удалить') 
               <option value=""></option>
               <option value=Найдено>Найдено</option>
               <option value=Потеряно>Потеряно</option>
               <option value=Удалить >Удалить</option>
+              <option value=Повтор>Повтор</option>
+              <option value=ОшибкаГруппой>Ошибка Группой</option>
             @elseif($BnipTypeStatusNull->status=='') 
               <option value="" selected></option>
               <option value=Найдено>Найдено</option>
               <option value=Потеряно>Потеряно</option>
               <option value=Удалить >Удалить</option>
+              <option value=Повтор>Повтор</option>
+              <option value=ОшибкаГруппой>Ошибка Группой</option>
             @endif
             
             </select>    
@@ -64,8 +72,8 @@
             </select>         
           @endforeach 
           Список постов пользователя, которые были опубликованы ...<br>
-          @if(isset($v_Bnips['Bnips']['c_bnipTypeStatusIs']))
-            @foreach($v_Bnips['Bnips']['c_bnipTypeStatusIs'] as $k_BnipTypeStatusIs => $BnipTypeStatusIs)
+          @if(isset($v_Bnips['Bnips']['cBnipTypeStatusIs']))
+            @foreach($v_Bnips['Bnips']['cBnipTypeStatusIs'] as $k_BnipTypeStatusIs => $BnipTypeStatusIs)
               {{$BnipTypeStatusIs->created_at}}<br>
               {{$BnipTypeStatusIs->status}}-{{$BnipTypeStatusIs->type_status}}
               {{$BnipTypeStatusIs->text}}

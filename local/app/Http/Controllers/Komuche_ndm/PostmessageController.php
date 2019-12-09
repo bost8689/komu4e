@@ -275,8 +275,8 @@ class PostmessageController extends Controller
 
     //обработка полученных данных
     public function processing(Request $request){
-        // $token_moderator=config('vk.token_moderator');
-        // $group_id_kndm1=config('vk.group_id_kndm1');
+
+        //счётчик выполненных комманд
         $countPostCommand=array('Удалить' => 0,'Реклама' => 0,'Повтор' => 0,'Ссылка' => 0,'Более3' => 0,'Найдено' => 0,'Потеряно' => 0,'Заказ' => 0,'Просмотрено'=>0);    
         
         //перебираю полученные данные
@@ -394,6 +394,7 @@ class PostmessageController extends Controller
                 Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
                 $img =Image::make($Photo->photomax_url);
                 $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
+
             }
             elseif($arrData['type']=='Потеряно'){
                 $pathMax = 'public/komu4e_ndm/bnip/poteryano/';
