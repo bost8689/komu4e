@@ -56,7 +56,7 @@ class PostmessageController extends Controller
 {	
     //public $mode_update = 1; //обновление перед показом включено //if($this->mode_update){}
     public $log_write = 1; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_postmessage'; //публикация логов //if($this->log_name){}
     private $group_id_kndm1 = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
@@ -65,11 +65,16 @@ class PostmessageController extends Controller
     public function __construct()
     {
         $this->token_moderator=config('vk.token_moderator');
-        $this->group_id_kndm1=config('vk.group_id_kndm1');
+        $this->group_id_kndm1=config('vk.group_id_kndm1');        
     }
 
 	//отображение постов
     public function view(Request $request){ 
+
+        //включить отладку или нет
+        if (!empty($request->input('debug') )) {
+            $this->mode_debug=1;
+        }
 
         //присвоение данных
         $date_view_wall = $request->input('date_view_wall');
@@ -381,6 +386,8 @@ class PostmessageController extends Controller
 
     //сохранения фотографий
     public function savePhoto(array $arrData,$Postmessage){
+        $debug['Отладка']='PostmessageController.savePhoto';
+
         foreach ($Postmessage->photospostmessage as $k_photo => $Photo) {
             $typeMax = 'jpg';
             $fileNameMax = $Postmessage->id.'_'.$k_photo.'.'.$typeMax;
@@ -391,17 +398,20 @@ class PostmessageController extends Controller
             elseif($arrData['type']=='Найдено'){
                 $pathMax = 'public/komu4e_ndm/bnip/naideno/';
                 $Bnip = $arrData['Bnip'];
-                Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
+                $Photosbnip = Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
                 $img =Image::make($Photo->photomax_url);
-                $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
+                // $debug[$Bnip->id]['Найдено - $img->height']=$img->height();
+                // $debug[$Bnip->id]['Найдено - $img->width']=$img->width();                
+                $img->insert('public/bnipWatermark.png', 'bottom-right');
+                $img->insert('public/bnipWatermark2.png', 'center')->save($pathMax.$fileNameMax);
 
             }
             elseif($arrData['type']=='Потеряно'){
                 $pathMax = 'public/komu4e_ndm/bnip/poteryano/';
                 $Bnip = $arrData['Bnip'];
-                Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
-                $img =Image::make($Photo->photomax_url);
-                $img->insert('public/bnipWatermark.png', 'bottom-right')->save($pathMax.$fileNameMax);
+                $Photosbnip = Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
+                $img->insert('public/bnipWatermark.png', 'bottom-right');
+                $img->insert('public/bnipWatermark2.png', 'center')->save($pathMax.$fileNameMax);
             }
             elseif($arrData['type']=='Заказ'){
                 $pathMax = 'public/komu4e_ndm/zakaz/';
@@ -416,6 +426,7 @@ class PostmessageController extends Controller
             $Photo->typemax = $typeMax;
             $Photo->save();            
         }
+        if($this->mode_debug){dump($debug);}
         return;   
     }
 

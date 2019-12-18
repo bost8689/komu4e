@@ -25,31 +25,33 @@
         </div>
         <div class="card-body">
           @if ($collectPostmessage['Orders']->count())
+          <span class="badge badge-danger">
             <div class="alert alert-danger" role="alert">
-              <span class="badge badge-danger">Внимание рекламодатель!<p></span>                        
+              Внимание рекламодатель!<p>                      
               @foreach ($collectPostmessage['Orders'] as $Order)
                 Заказ №{{$Order->id }} : Заказано {{$Order->ordered}} : Выполнено {{$Order->executed}}<p> 
                 <input  type="hidden" name="processing[{{$loop->parent->index}}][Orders][{{$loop->index}}][id]" value="{{$Order->id}}">
               @endforeach  
-            </div>                      
+            </div>  
+          </span>                    
           @endif 
           
           @foreach($collectPostmessage['Postmessages'] as $Postmessage)
             
 {{-- Красим слова --}}
+            <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост">{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
             @if ($Postmessage->status == "Найдено" or $Postmessage->status == "Потеряно")
             <span class="badge badge-warning">
-              <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
-              {{$Postmessage->status}}
-              @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif 
-            </span>
             @elseif ($Postmessage->status == "Удалить")
-            <span class="badge badge-danger">
-              <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост" >{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
-              {{$Postmessage->status}}
-              @if (isset($Postmessage->status)) {{$Postmessage->user->name}} @endif 
-            </span>
+            <span class="badge badge-danger"> 
+            @elseif ($Postmessage->status == "Заказ")
+            <span class="badge badge-success"> 
+            @else
+            <span class="badge badge-light">             
             @endif
+            {{$Postmessage->status}} -
+            @if (isset($Postmessage->status)) {{$Postmessage->user->name}}@endif
+            </span>
 
 
             <br>

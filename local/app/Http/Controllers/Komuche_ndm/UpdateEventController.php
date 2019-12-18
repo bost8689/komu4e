@@ -32,11 +32,16 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 class UpdateEventController extends Controller
 {	
     public $log_write = 0; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
     public function updateEvent(Request $request){
+
+        //включить отладку или нет
+        if (!empty($request->input('debug') )) {
+            $this->mode_debug=1;
+        }
 
         $token_moderator=config('vk.token_moderator');
         $group_id_kndm1=config('vk.group_id_kndm1');

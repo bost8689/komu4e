@@ -182,7 +182,7 @@ class BnipController extends Controller
 
         //Отладка
         if($this->mode_debug){
-            dd($debug);
+            dump($debug);
         }
         return redirect()->route('home');     
 

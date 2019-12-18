@@ -34,33 +34,28 @@ Route::group(['middleware' => ['auth','permission']], function () {
 
 	Route::post('/UpdateEvent', 'Komuche_ndm\UpdateEventController@updateEvent')->name('updateEvent');
 
-	//Postmessage
+	//Посты - Postmessage
 	Route::match(['get', 'post'],'/postmessage', 'Komuche_ndm\PostmessageController@view')->name('view_postmessage');
 	Route::post('/postmessage/processing', 'Komuche_ndm\PostmessageController@processing')->name('processing_postmessage');
 	Route::match(['get', 'post'],'/postmessage/find', 'Komuche_ndm\PostmessageController@find')->name('find_postmessage');
 
-
-
-	//Bnip
+	//BNIP - Бюро находок
 	Route::match(['get', 'post'],'/bnip', 'Komuche_ndm\BnipController@view')->name('view_bnip');
 	Route::post('/bnip/processing', 'Komuche_ndm\BnipController@processingBnip')->name('processingBnip');
-	Route::post('/bnip/message', 'Komuche_ndm\BnipController@view_message')->name('view_message_bnip');
+	//BNIP - Бюро находок - сообщения
+	Route::post('/bnip/message', 'Komuche_ndm\BnipMessageController@view_message')->name('view_message_bnip');
 	Route::post('/bnip/message/processing', 'Komuche_ndm\BnipController@processing_message')->name('processing_message_bnip');
-	
 
-	//Order
+	//Order - Заказы
 	Route::match(['get', 'post'],'/order','Komuche_ndm\OrderController@view')->name('view_order');
 	Route::post('/order/add','Komuche_ndm\OrderController@add')->name('add_order');
 	Route::post('/order/processing','Komuche_ndm\OrderController@processing_add')->name('processing_add_order');
 	Route::post('/order/delete','Komuche_ndm\OrderController@delete_order')->name('delete_order');
 	//Route::get('/order/add/processing', function () {  abort(404); });
 
-
 	//Message
 	Route::post('/message','Komuche_ndm\MessageController@view')->name('view_message');
 	Route::post('/message/processing','Komuche_ndm\MessageController@processing_message')->name('processing_message');
-
-
 
 });
 

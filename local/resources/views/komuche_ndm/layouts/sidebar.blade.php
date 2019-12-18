@@ -49,16 +49,21 @@
                  <input type=date class="form-control" name=date_view_wall value={{ date('Y-m-d',time()) }}>
                </div>
              </div>
-             <div class="checkbox">
+              <div class="checkbox">
               <label>
-              <input type="checkbox" name=checkbox_all value="Показать все записи">Показать все записи<br>                
+              <input type="checkbox" name=checkbox_all value="Показать все записи">Показать все записи<br>
               </label>
               </div> 
               <div class="checkbox">
               <label>  
               <input type="checkbox" name=checkbox_status_is value="Показать только обработанные">Показать только обработанные
               </label>             
-            </div> 
+              </div> 
+              <div class="checkbox">
+              <label>
+              <input type="checkbox" name=debug value="Отладка">Отладка<br>
+              </label>
+              </div>
             <div class="col-sm-14">
               <button type="submit" class="btn btn-primary" name="btn_view_wall">Найти</button>
             </div>          
@@ -67,6 +72,11 @@
           <form class="form-horizontal" role="form" method="POST" action="{{ route('updateEvent') }}">
             {{ csrf_field() }} 
             <div class="col-sm-14">
+              <div class="checkbox">
+              <label>
+              <input type="checkbox" name=debug value="Отладка">Отладка<br>
+              </label>
+              </div>
               <button type="submit" class="btn btn-primary" name="btn_update_event">Обновить</button>
             </div>          
           </form>

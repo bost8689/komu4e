@@ -97,13 +97,11 @@
             </div>
         </nav>
 
-        <main class="py-4">
-            
+        <main class="py-4">            
             @yield('content')
             @yield('sidebar')
         </main>
         
-
 
     </div>
     <script src="{{ asset('js/jquery-3.2.1.min.js') }}"></script>    

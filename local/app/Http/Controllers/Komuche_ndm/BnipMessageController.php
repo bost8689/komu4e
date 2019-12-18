@@ -53,11 +53,11 @@ use Intervention\Image\ImageManager;
             dump('empty истина checkbox');
         }*/
 
-class BnipController extends Controller
+class BnipMessageController extends Controller
 {	
-    public $log_write = 1; //публикация логов //if($this->log_write){}
+    //public $log_write = 1; //публикация логов //if($this->log_write){}
     public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
-    public $log_name = 'komu4e_ndm_bnip'; //публикация логов //if($this->log_name){}
+    public $log_name = 'BnipMessageController'; //публикация логов //if($this->log_name){}
     private $group_id_kndm = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
     private $token_group_kndm = Null;
@@ -71,7 +71,8 @@ class BnipController extends Controller
         $this->token_group_kndm=config('vk.token_group_kndm4'); //bnip        
     }
 
-    public function view_message(Request $request){
+    //отобразить сообщения
+    public function view(Request $request){
         //dump('message');
 
         //$this->token_moderator=config('vk.token_moderator');
