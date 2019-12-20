@@ -10,9 +10,14 @@
       @endif
       <form role="form" action="{{route('processing_postmessage')}}" method=POST>
       {{ csrf_field() }}  
+      @if (count($PostmessagesYesterday)>0)
       <div class="alert alert-danger" role="alert">
+      @else
+      <div class="alert alert-success" role="alert"> 
+      @endif
       Количество необработанных записей за предыдущие дни {{count($PostmessagesYesterday)}}
       </div>
+
       @foreach($collectPostmessages as $collectPostmessage)
       <div class="card">
         <div class="card-header">
