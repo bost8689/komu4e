@@ -86,7 +86,10 @@ class PostmessageController extends Controller
             //обновление
             $UpdateEventController = new UpdateEventController();
             $UpdateEventController->updateEvent($request);
-        }      
+        }    
+
+        $PostmessagesYesterday=Postmessage::whereNull('status')->where('date','<', $date_view_wall.' 00:00:00')->orderBy('date', 'desc')->get();
+        // dd(count($PostmessagesYesterday));
 
         //Получаю объект постов для отображения с условиями
         if (isset($checkbox_all)) { //если хочу показать (все - обработанные и не обработанные), независимо от статуса
@@ -129,7 +132,7 @@ class PostmessageController extends Controller
             'коллекция постов по уникальным пользователям $collectPostmessages'=>$collectPostmessages,
         ]);}  
 
-        return view('komuche_ndm.postmessage.view_postmessage',['collectPostmessages' => $collectPostmessages]); 
+        return view('komuche_ndm.postmessage.view_postmessage',['collectPostmessages' => $collectPostmessages,'PostmessagesYesterday'=>$PostmessagesYesterday]); 
     } //end function view
 
     //обновление

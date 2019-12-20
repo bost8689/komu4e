@@ -10,7 +10,9 @@
       @endif
       <form role="form" action="{{route('processing_postmessage')}}" method=POST>
       {{ csrf_field() }}  
-
+      <div class="alert alert-danger" role="alert">
+      Количество необработанных записей за предыдущие дни {{count($PostmessagesYesterday)}}
+      </div>
       @foreach($collectPostmessages as $collectPostmessage)
       <div class="card">
         <div class="card-header">
@@ -25,7 +27,7 @@
         </div>
         <div class="card-body">
           @if ($collectPostmessage['Orders']->count())
-          <span class="badge badge-danger">
+          
             <div class="alert alert-danger" role="alert">
               Внимание рекламодатель!<p>                      
               @foreach ($collectPostmessage['Orders'] as $Order)
@@ -33,11 +35,10 @@
                 <input  type="hidden" name="processing[{{$loop->parent->index}}][Orders][{{$loop->index}}][id]" value="{{$Order->id}}">
               @endforeach  
             </div>  
-          </span>                    
+                           
           @endif 
           
-          @foreach($collectPostmessage['Postmessages'] as $Postmessage)
-            
+          @foreach($collectPostmessage['Postmessages'] as $Postmessage)            
 {{-- Красим слова --}}
             <a href=https://vk.com/wall-46590816_{{$Postmessage->source_id}} target=_blank title="Просмотреть пост">{{date("d.m.Y H:i:s", strtotime($Postmessage->date))}}</a>
             @if ($Postmessage->status == "Найдено" or $Postmessage->status == "Потеряно")
