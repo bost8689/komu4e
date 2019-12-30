@@ -89,35 +89,17 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
-        'komuche_ndm_postmessage' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/Komuche_ndm/PostmessageController.log'),
+        
+        // 'komu4e_ndm_updatevent' => [
+        //     'driver' => 'daily',
+        //     'path' => storage_path('logs/Komuche_ndm/UpdateEventController.log'),
+        //     'level' => 'debug',
+        //     'days' => 7,
+        // ],        
+        'UpdateEventController' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/UpdateEventController.log'),
             'level' => 'debug',
-            'days' => 7,
-        ],
-        'komuche_ndm_message' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/Komuche_ndm/MessageController.log'),
-            'level' => 'debug',
-            'days' => 7,
-        ],
-        'komu4e_ndm_updatevent' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/Komuche_ndm/UpdateEventController.log'),
-            'level' => 'debug',
-            'days' => 7,
-        ],
-        'komu4e_ndm_bnip' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/Komuche_ndm/BnipController.log'),
-            'level' => 'debug',
-            'days' => 7,
-        ],
-        'komu4e_ndm_callback' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/Komuche_ndm/CallbackController.log'),
-            'level' => 'debug',
-            'days' => 7,
         ],
 
         
