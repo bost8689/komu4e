@@ -72,7 +72,7 @@ class BnipMessageController extends Controller
     }
 
     //отобразить сообщения
-    public function view(Request $request){
+    public function view_message(Request $request){
         //dump('message');
 
         //$this->token_moderator=config('vk.token_moderator');
@@ -83,18 +83,19 @@ class BnipMessageController extends Controller
 
         $params = array(
         'offset' => 0,
-        'count' => 10, //по умолчанию 20, мах 200
+        'count' => 200, //по умолчанию 20, мах 200
         'filter' => 'unread',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
         // important — беседы, помеченные как важные (только для сообщений сообществ);
         // unanswered — беседы, помеченные как неотвеченные (только для сообщений сообществ). 
         'extended' => 1,//1 — возвращать дополнительные поля для пользователей и сообществ. флаг, может принимать значения 1 или 0.
-        'start_message_id' => 9000,
+        'start_message_id' => 11000,
         'group_id' => $this->group_id_kndm,
         'fields' => 'name,ban_info',        
         );
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
+        dd($messagesGetConversations);
         //dd($messagesGetConversations);
         //коллекция кол-во диалогов
         $collectPeers->put('countPeers', $messagesGetConversations['count']);

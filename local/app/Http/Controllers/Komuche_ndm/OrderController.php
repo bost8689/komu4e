@@ -21,7 +21,7 @@ class OrderController extends Controller
 {
     private $group_id_kndm = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
 
     public function __construct()
     {
@@ -31,9 +31,14 @@ class OrderController extends Controller
 
     public function view(Request $request)
     {  
-        $debug = array('Отладка'=>'OrderController.view');
+        //включить отладку или нет
+        if (!empty($request->input('debug'))) {
+            $debug = array('Отладка'=>'OrderController.view');
+            $this->mode_debug=1;
+        }
         
-        $Orders = Order::with('Usersvk')->where('status',Null)->get();               
+        $Orders = Order::with('Usersvk')->where('status',Null)->orderBy('id', 'desc')->get();
+
         //Отладка
         if($this->mode_debug){
             $debug['Заказы $Orders']=$Orders;
@@ -41,8 +46,9 @@ class OrderController extends Controller
         }  
 
         //подключаю прибыль и получаю значения
-        $ProfitController = new ProfitController();
-        $Profit=array();
+        $ProfitController = new ProfitController();               
+        $ProfitController->mode_debug = $this->mode_debug;
+        $Profit=array(); 
         $Profit['profitThisMonth']=$ProfitController->profitGetThisMonth();
         $Profit['profitBackMonth']=$ProfitController->profitGetBackMonth();
 

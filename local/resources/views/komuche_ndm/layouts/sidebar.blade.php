@@ -22,6 +22,11 @@
                   </select>
                 </div>
               </div>
+              <div class="checkbox">
+              <label>
+              <input type="checkbox" name=debug value="Отладка">Отладка<br>
+              </label>
+              </div>
               <div class="col-sm-14">
                 <button type="submit" class="btn btn-primary">Добавить</button>
               </div>
@@ -29,6 +34,11 @@
             <p>
             <form role="form" action="{{route('view_order')}}" method="post"> 
             {{csrf_field()}}
+            <div class="checkbox">
+            <label>
+            <input type="checkbox" name=debug value="Отладка">Отладка<br>
+            </label>
+            </div>
             <div class="col-sm-14">
               <button type="submit" class="btn btn-primary">Показать</button>
             </div> 
@@ -92,6 +102,11 @@
             {{csrf_field()}}
             <div class="form-group">
               <div class="col-sm-14">
+                <div class="checkbox">
+                <label>
+                <input type="checkbox" name=debug value="Отладка">Отладка<br>
+                </label>
+                </div>
                 <select class="form-control" name="group_type">
                   <option value=""></option>
                   <option value="Объявления">Объявления</option>
@@ -115,6 +130,11 @@
         <div class="card-body">
           <form role="form" action="{{ route('view_bnip')}}" method="post"> 
             {{csrf_field()}}
+            <div class="checkbox">
+            <label>
+            <input type="checkbox" name=debug value="Отладка">Отладка<br>
+            </label>
+            </div>
             <div class="col-sm-14">
               <button type="submit" class="btn btn-primary">Показать</button>
             </div> 
@@ -122,6 +142,11 @@
           <p>
           <form role="form" action="{{route('view_message_bnip')}}" method="post"> 
             {{csrf_field()}}
+            <div class="checkbox">
+            <label>
+            <input type="checkbox" name=debug value="Отладка">Отладка<br>
+            </label>
+            </div>
             <div class="col-sm-14">
               <button type="submit" class="btn btn-primary">Сообщения</button>
             </div> 
@@ -145,6 +170,11 @@
               
               <input type="date" class="form-control" name="date_begin" value={{date('Y-m-d',time()-2592000)}}>
               
+            </div>
+            <div class="checkbox">
+            <label>
+            <input type="checkbox" name=debug value="Отладка">Отладка<br>
+            </label>
             </div>
             <div class="col-sm-14">
               <button type="submit" class="btn btn-primary">Найти</button>

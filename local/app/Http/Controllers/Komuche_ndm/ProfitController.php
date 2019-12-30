@@ -19,7 +19,7 @@ class ProfitController extends Controller
 {
     private $group_id_kndm = Null; //
     private $token_moderator = Null;
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
 
     public function __construct()
     {
