@@ -177,10 +177,18 @@ class PostmessageController extends Controller
                             else{ //если есть такой пользователь, то обновляем фото
                                 $Usersvk->photo = $photo;
                                 $Usersvk->save();
-                            }                    
-                        
+                            }       
+
+                        // Log::channel('PostmessageController')->info(['writeWallPostNew'=>$wallPostNew,'$Usersvk->'=>$Usersvk->id]);
+                        if (empty(Auth::user()->id)) {
+                            $userId = 1; //администратор
+                            //Log::channel('PostmessageController')->info(['userId'=>'пустой']);
+                        }
+                        else{
+                            $userId = Auth::user()->id;   
+                        }
                         //создаю новый объект в БД
-                        $Postmessage = Postmessage::create(['source_id'=>$wallPostNew['object']['id'],'usersvk_id'=>$Usersvk->id,'text'=>$wallPostNew['object']['text'],'date'=>date('Y-m-d H:m:s',$wallPostNew['object']['date']),'user_id'=>Auth::user()->id,'status'=>Null,'type_status'=>Null]);
+                        $Postmessage = Postmessage::create(['source_id'=>$wallPostNew['object']['id'],'usersvk_id'=>$Usersvk->id,'text'=>$wallPostNew['object']['text'],'date'=>date('Y-m-d H:m:s',$wallPostNew['object']['date']),'user_id'=>$userId,'status'=>Null,'type_status'=>Null]);
                         $countAddDBPostmessage++;
 
                         //перебираю фото этого поста

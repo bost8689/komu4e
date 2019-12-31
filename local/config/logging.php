@@ -101,6 +101,11 @@ return [
             'path' => storage_path('logs/UpdateEventController.log'),
             'level' => 'debug',
         ],
+        'PostmessageController' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/PostmessageController.log'),
+            'level' => 'debug',
+        ],
 
         
 
