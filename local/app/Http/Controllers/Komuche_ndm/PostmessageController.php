@@ -82,11 +82,11 @@ class PostmessageController extends Controller
         $checkbox_status_is = $request->input('checkbox_status_is'); //если есть статус
 
         //если это не показать выполненные то показывается обновление
-        if(!isset($checkbox_status_is)){
-            //обновление
-            $UpdateEventController = new UpdateEventController();
-            $UpdateEventController->updateEvent($request);
-        }    
+        // if(!isset($checkbox_status_is)){
+        //     //обновление
+        //     $UpdateEventController = new UpdateEventController();
+        //     $UpdateEventController->updateEvent($request);
+        // }    
 
         $PostmessagesYesterday=Postmessage::whereNull('status')->where('date','<', $date_view_wall.' 00:00:00')->orderBy('date', 'desc')->get();
         // dd(count($PostmessagesYesterday));
@@ -132,7 +132,13 @@ class PostmessageController extends Controller
             'коллекция постов по уникальным пользователям $collectPostmessages'=>$collectPostmessages,
         ]);}  
 
-        return view('komuche_ndm.postmessage.view_postmessage',['collectPostmessages' => $collectPostmessages,'PostmessagesYesterday'=>$PostmessagesYesterday]); 
+
+        //счётчик добавленных
+        $lastCountAddDBPostmessage = Settings::where('name','komu4e_ndm_lastCountAddDBPostmessage')->first();
+        $lastCountAddDBUsersvk = Settings::where('name','komu4e_ndm_lastCountAddDBUsersvk')->first();        
+        $lastCountAddDBPhotosPost = Settings::where('name','komu4e_ndm_lastCountAddDBPhotosPost')->first();       
+
+        return view('komuche_ndm.postmessage.view_postmessage',['collectPostmessages' => $collectPostmessages,'PostmessagesYesterday'=>$PostmessagesYesterday,'lastCountAddDBPostmessage'=>$lastCountAddDBPostmessage->value1,'lastCountAddDBUsersvk'=>$lastCountAddDBUsersvk->value1,'lastCountAddDBPhotosPost'=>$lastCountAddDBPhotosPost->value1]); 
     } //end function view
 
     //обновление
@@ -179,10 +185,9 @@ class PostmessageController extends Controller
                                 $Usersvk->save();
                             }       
 
-                        // Log::channel('PostmessageController')->info(['writeWallPostNew'=>$wallPostNew,'$Usersvk->'=>$Usersvk->id]);
+                        // Если сработал робот
                         if (empty(Auth::user()->id)) {
                             $userId = 1; //администратор
-                            //Log::channel('PostmessageController')->info(['userId'=>'пустой']);
                         }
                         else{
                             $userId = Auth::user()->id;   
@@ -285,7 +290,23 @@ class PostmessageController extends Controller
                 'Кол-во новых записанных полльзователей countAddDBUsersvk'=>$countAddDBUsersvk,
                 'Кол-во новых записанных фотографий countAddDBPhotosPost'=>$countAddDBPhotosPost,
             ]);}
-            return;
+
+            //счётчик добавленных
+            $lastCountAddDBPostmessage = Settings::where('name','komu4e_ndm_lastCountAddDBPostmessage')->first();
+            $lastCountAddDBPostmessage->value1 = $lastCountAddDBPostmessage->value1 + $countAddDBPostmessage;
+            $lastCountAddDBPostmessage->save();
+            $lastCountAddDBUsersvk = Settings::where('name','komu4e_ndm_lastCountAddDBUsersvk')->first();
+            $lastCountAddDBUsersvk->value1 = $lastCountAddDBUsersvk->value1 + $countAddDBUsersvk;
+            $lastCountAddDBUsersvk->save();
+            $lastCountAddDBPhotosPost = Settings::where('name','komu4e_ndm_lastCountAddDBPhotosPost')->first();
+            $lastCountAddDBPhotosPost->value1 = $lastCountAddDBPhotosPost->value1 + $countAddDBPhotosPost;
+            $lastCountAddDBPhotosPost->save();
+
+            return array('Отладка'=>'PostmessageController.writeWallPostNew',                        
+                'Входящие данные $wallPostNeWs'=>$wallPostNews,
+                'Кол-во новых записанных постов countAddDBPostmessage'=>$countAddDBPostmessage,
+                'Кол-во новых записанных полльзователей countAddDBUsersvk'=>$countAddDBUsersvk,
+                'Кол-во новых записанных фотографий countAddDBPhotosPost'=>$countAddDBPhotosPost);
             // return $resultWallPostNew;
     } //end function update
 
@@ -391,6 +412,17 @@ class PostmessageController extends Controller
             'Входящие данные $request->input(processing)'=>$request->input('processing'),
             'Кол-во выполненных команд $countPostCommand'=>$countPostCommand,
         ]);}
+
+        //обнуляю счётчик добавленных постов
+        $lastCountAddDBPostmessage = Settings::where('name','komu4e_ndm_lastCountAddDBPostmessage')->first();
+        $lastCountAddDBPostmessage->value1 = 0;
+        $lastCountAddDBPostmessage->save();
+        $lastCountAddDBUsersvk = Settings::where('name','komu4e_ndm_lastCountAddDBUsersvk')->first();
+        $lastCountAddDBUsersvk->value1 = 0;
+        $lastCountAddDBUsersvk->save();
+        $lastCountAddDBPhotosPost = Settings::where('name','komu4e_ndm_lastCountAddDBPhotosPost')->first();
+        $lastCountAddDBPhotosPost->value1 = 0;
+        $lastCountAddDBPhotosPost->save();
 
         return view('komuche_ndm.postmessage.processing_postmessage');
     }

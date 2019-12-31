@@ -36,7 +36,7 @@ class UpdateEventController extends Controller
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
-    public function updateEvent(Request $request){
+    /*public function updateEvent(Request $request){
 
         //включить отладку или нет
         if (!empty($request->input('debug') )) {
@@ -115,8 +115,7 @@ class UpdateEventController extends Controller
         }          
 
         //return redirect()->route('home');
-
-    } //end function update
+    } //end function update*/
 
     public function getEvent(){
         //включить отладку или нет

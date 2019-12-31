@@ -17,6 +17,11 @@
       @endif
       Количество необработанных записей за предыдущие дни {{count($PostmessagesYesterday)}}
       </div>
+      <div class="alert alert-success" role="alert"> 
+      Кол-во новых постов: {{$lastCountAddDBPostmessage}}
+      Кол-во новых пользователей: {{$lastCountAddDBPostmessage}}
+      Кол-во новых фото: {{$lastCountAddDBPhotosPost}}
+      </div>
 
       @foreach($collectPostmessages as $collectPostmessage)
       <div class="card">
