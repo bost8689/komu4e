@@ -32,10 +32,14 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //$this->group_id_kndm3 = 555;
-        //dump($this->group_id_kndm1);
-        
-        return view('home');    
+        //проверяем наличие файла с ошибками
+        $path = storage_path('logs\laravel*.log'); 
+        $fileError=[];  
+        foreach(glob($path) as $file) { 
+        // далее получаем последний добавленный/измененный файл      
+        $fileError[] = $file; // массив всех файлов       
+        }   
+        return view('home',['fileError' => $fileError]);    
         //return view('home');
     }
 }

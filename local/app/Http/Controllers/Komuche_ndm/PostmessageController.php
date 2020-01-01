@@ -71,7 +71,7 @@ class PostmessageController extends Controller
 	//отображение постов
     public function view(Request $request){ 
 
-        //включить отладку или нет
+    	//включить отладку или нет
         if (!empty($request->input('debug') )) {
             $this->mode_debug=1;
         }

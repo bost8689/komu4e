@@ -3,7 +3,12 @@
 {{-- test --}}
 @section('main')
     <div class="col-sm-8">
-      <div class="card">
+        @if (count($fileError) > 0)
+        <div class="alert alert-danger" role="alert">
+        Есть ошибки в программе. Сообщите администратору.
+        </div>
+        @endif 
+      <div class="card">        
         <div class="card-header">Cтена</div>
         <div class="card-body">
           @if (session('status'))
