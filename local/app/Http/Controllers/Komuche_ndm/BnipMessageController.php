@@ -56,11 +56,11 @@ use Intervention\Image\ImageManager;
 class BnipMessageController extends Controller
 {	
     //public $log_write = 1; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'BnipMessageController'; //публикация логов //if($this->log_name){}
     private $group_id_kndm = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
-    private $token_group_kndm = Null;
+    private $token_group_kndm = Null; //потеряшка
     private $debug = array();
     //public $mode_banUsersvk = 1;
     
@@ -71,16 +71,11 @@ class BnipMessageController extends Controller
         $this->token_group_kndm=config('vk.token_group_kndm4'); //bnip        
     }
 
-    //отобразить сообщения
+    //отобразить сообщения и обработать диалоги
     public function view_message(Request $request){
-        //dump('message');
 
-        //$this->token_moderator=config('vk.token_moderator');
-        //$this->group_id_kndm=config('vk.group_id_kndm4');
-        //if($this->mode_debug) {dump('MessageController.view');}         
-        //if($this->log_write){Log::channel($this->log_name)->info('тест лог');}
+        //получаю коллекцию не прочитанных диалогов
         $collectPeers = collect([]);
-
         $params = array(
         'offset' => 0,
         'count' => 200, //по умолчанию 20, мах 200
@@ -95,13 +90,12 @@ class BnipMessageController extends Controller
         'fields' => 'name,ban_info',        
         );
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
-        dd($messagesGetConversations);
-        //dd($messagesGetConversations);
-        //коллекция кол-во диалогов
+
+        //перебираю коллекцию диалогов
         $collectPeers->put('countPeers', $messagesGetConversations['count']);
         foreach ($messagesGetConversations['items'] as $k_peer => $v_peer) { 
             //присвоение данных          
-            if($this->mode_debug) { dump($v_peer); }
+            //if($this->mode_debug) { dump($v_peer); }
             $a_peers[$k_peer]=$v_peer;
             
             $peer_type = $v_peer['conversation']['peer']['type']; //user или ???
@@ -136,10 +130,10 @@ class BnipMessageController extends Controller
 
             }
             else{
-                dump('Сообщите администратору, что неизвестный peer_type');
+                dump('Сообщите администратору, что неизвестный peer_type',$v_peer['conversation']['peer']['type']);
             }
             
-            //получение диалога
+            //Получение данных по конкретному диалогу
             $params= array(             
             'offset' => 0,
             'count' => 6,
@@ -148,6 +142,7 @@ class BnipMessageController extends Controller
             'group_id' => $this->group_id_kndm,//          
             );            
             $messagesGetHistory = VK::messagesGetHistory($this->token_group_kndm,$params,Null);
+
             if($this->mode_debug) { dump($messagesGetHistory); }
             if($this->mode_debug) { dump('кол-во сообщений', $messagesGetHistory['count']); }
             
@@ -256,6 +251,7 @@ class BnipMessageController extends Controller
         if(!empty($a_peers)){
             $collectPeers->put('peers',$a_peers);
         }  
+        dump($collectPeers);
         if($this->mode_debug) { dump($collectPeers); }
         //dump($collectPeers); 
         return view('komuche_ndm.bnip.view_messages_bnip',['peers' => $collectPeers]); 
@@ -307,7 +303,7 @@ class BnipMessageController extends Controller
             elseif($v_bnip['status']=='Ошибка'){
                 //отправляю сообщение, что Вы ошиблись группой
                 $message='Здравствуйте, возможно Вы ошиблись группой. Потеряшка - это находки и потери'."\n".'
-                    По всем вопросам пишите в сообщения соответствующего сообщества. Например КомуЧё Объявления по этой ссылке https://vk.com/im?sel=-46590816'."\n".'
+                    По всем вопросам пишите в сообщения соответствующего сообщества. Например КомуЧё Надым по этой ссылке https://vk.com/im?sel=-117556337'."\n".'
                     Наши сообщества:'."\n".'
                     КомуЧё Надым - городское сообщество. https://vk.com/komuche_nadym'."\n".'
                     КомуЧё Авто - попутчики, грузо и пассажироперевозки https://vk.com/auto_nadym'."\n".'
@@ -348,6 +344,16 @@ class BnipMessageController extends Controller
             Photosbnip::create(['filenamemax'=>$fileNameMax,'pathmax'=>$pathMax,'bnip_id'=>$Bnip->id]);
             }
         }
+    }
+
+    public function send_message(array $arrData,$Usersvk){
+        $params = array(             
+            'user_id' => $Usersvk->user_id,
+            'message' => $arrData['message'], //220409092 Вячеслав Тихонов
+            'random_id'=> rand(), //рандомное число
+            //'group_ids' => $group_ids,    
+        );
+        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);       
     }
    
 }//end class

@@ -5,7 +5,7 @@
     <div class="col-sm-8">
         @if (count($fileError) > 0)
         <div class="alert alert-danger" role="alert">
-        Есть ошибки в программе. Сообщите администратору.
+        Есть ошибки в программе {{count($fileError)}}. Сообщите администратору.
         </div>
         @endif 
       <div class="card">        

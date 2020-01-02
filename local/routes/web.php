@@ -44,7 +44,7 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	Route::post('/bnip/processing', 'Komuche_ndm\BnipController@processingBnip')->name('processingBnip');
 	//BNIP - Бюро находок - сообщения
 	Route::post('/bnip/message', 'Komuche_ndm\BnipMessageController@view_message')->name('view_message_bnip');
-	Route::post('/bnip/message/processing', 'Komuche_ndm\BnipController@processing_message')->name('processing_message_bnip');
+	Route::post('/bnip/message/processing', 'Komuche_ndm\BnipMessageController@processing_message')->name('processing_message_bnip');
 
 	//Order - Заказы
 	Route::match(['get', 'post'],'/order','Komuche_ndm\OrderController@view')->name('view_order');
