@@ -163,7 +163,7 @@
             {{csrf_field()}}
             <div class="form-group">
               <div class="col-sm-14">                            
-                <input type="text" class="form-control" name="usersvk_id" placeholder="Ссылка пользователя">
+                <input type="text" class="form-control" name="link_usersvk" placeholder="Ссылка пользователя">
               </div>
             </div>
             <div class="form-group">

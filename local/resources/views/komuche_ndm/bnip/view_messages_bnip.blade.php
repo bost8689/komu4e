@@ -8,7 +8,7 @@
         {{ session('status') }}
       </div>          
       @endif
-          Кол-во сообщений {{$peers['countPeers']}}
+          Кол-во диалогов: {{$peers['countPeers']}}
           <form role="form" action="{{route('processing_message_bnip')}}" method=POST>
           {{ csrf_field() }}
           @if(!empty($peers['peers']))

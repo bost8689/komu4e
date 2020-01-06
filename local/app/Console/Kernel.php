@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             $UpdateEventController = new UpdateEventController();
             $result = $UpdateEventController->getEvent();
-            Log::channel('UpdateEventController')->info(['Запуск $UpdateEventController->getEvent'=>$result]);
+            //Log::channel('UpdateEventController')->info(['Запуск $UpdateEventController->getEvent'=>$result]);
         })->everyMinute();
     }
 

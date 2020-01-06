@@ -42,8 +42,8 @@ use VK\Exceptions\VKApiException;
 
 class MessageController extends Controller
 {	
-    public $log_write = 1; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $log_write = 0; //публикация логов //if($this->log_write){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_message'; //публикация логов //if($this->log_name){} 
     private $token_moderator = Null;
     private $group_id_kndm = Null;
@@ -90,10 +90,11 @@ class MessageController extends Controller
         // important — беседы, помеченные как важные (только для сообщений сообществ);
         // unanswered — беседы, помеченные как неотвеченные (только для сообщений сообществ). 
         'extended' => 1,//1 — возвращать дополнительные поля для пользователей и сообществ. флаг, может принимать значения 1 или 0.
-        'start_message_id' => 5000,
+        //'start_message_id' => 10000,
         'group_id' => $this->group_id_kndm,
         'fields' => 'name,ban_info',        
         );
+        //dd($this->token_group_kndm);
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
         //коллекция кол-во диалогов
         $c_peers->put('group_type', $request->input('group_type'));
@@ -137,6 +138,18 @@ class MessageController extends Controller
             }
             else{
                 dump('Сообщите администратору, что неизвестный peer_type');
+                //ищем у себя этого пользователя, если нет, то добавляем
+                $Usersvk = Usersvk::where('user_id',$userId)->first();
+                if(!isset($Usersvk)){ 
+                    $params = array('user_ids' => $userId,'fields' => 'photo_100');
+                    $usersGet = VK::usersGet($this->token_moderator,$params,Null);
+                    $firstName = $usersGet[0]['first_name'];
+                    $lastName = $usersGet[0]['last_name'];
+                    $photo = $usersGet[0]['photo_100'];
+                    $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);                    
+                    
+                }
+                $a_peers[$k_peer]['Usersvk']=$Usersvk;
             }
             
             //получение диалога
@@ -151,7 +164,7 @@ class MessageController extends Controller
             if($this->mode_debug) { dump($messagesGetHistory); }
             if($this->mode_debug) { dump('кол-во сообщений', $messagesGetHistory['count']); }
             
-                        
+            //dd('stop');           
             //перебираем сообщения
             foreach ($messagesGetHistory['items'] as $k_history => $v_history) {
                 $a_peers[$k_peer]['messages'][$k_history]=$v_history;
@@ -293,9 +306,8 @@ class MessageController extends Controller
                         $message = '1. Перед каждой оплатой уточняйте реквизиты.                        
                         2. В комментариях платежа ничего писать не надо.
                         3. Для 2 типа размещения (постов от своего имени: ) После оплаты ожидайте от нас ответа, что Вас добавили в программу и только после этого можно будет размещать информацию, иначе программа заблокирует Вас.
-
-                        Газпромбанк 5264 8321 2715 3548 
-                        Сбербанк 5336 6900 1286 3579
+                        
+                        Сбербанк 5336 6901 8112 0454
                         Яндекс деньги 4100 134 9075 1099
 
                         4. После оплаты напишите, что отправили: сумму, на какую карту отправили и Имя отправителя.';
@@ -319,10 +331,6 @@ class MessageController extends Controller
                         2. После согласования информации Вам высылают реквизиты на оплату. 
                         Способы оплаты удобным для Вас способом: 
                         Перевод денежных средств на карту Сбербанк, Газпромбанк, Yandex деньги. 
-
-                        Дополнительные наши услуги: 
-                        1. Оформление групп, а так же их ведение. 
-                        5. Услуги автоматизации обработки информации в социальных группах. Интернет-магазинов. 
 
                         С Уважением команда КомуЧё';
                         $this->send_message(array('message' => $message),$Usersvk); 

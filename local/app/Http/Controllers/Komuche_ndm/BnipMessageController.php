@@ -85,7 +85,7 @@ class BnipMessageController extends Controller
         // important — беседы, помеченные как важные (только для сообщений сообществ);
         // unanswered — беседы, помеченные как неотвеченные (только для сообщений сообществ). 
         'extended' => 1,//1 — возвращать дополнительные поля для пользователей и сообществ. флаг, может принимать значения 1 или 0.
-        'start_message_id' => 11000,
+        //'start_message_id' => 19000,
         'group_id' => $this->group_id_kndm,
         'fields' => 'name,ban_info',        
         );
@@ -96,8 +96,7 @@ class BnipMessageController extends Controller
         foreach ($messagesGetConversations['items'] as $k_peer => $v_peer) { 
             //присвоение данных          
             //if($this->mode_debug) { dump($v_peer); }
-            $a_peers[$k_peer]=$v_peer;
-            
+            $a_peers[$k_peer]=$v_peer;            
             $peer_type = $v_peer['conversation']['peer']['type']; //user или ???
             $userId = $v_peer['conversation']['peer']['id'];
             if($peer_type=='user'){
@@ -133,6 +132,7 @@ class BnipMessageController extends Controller
                 dump('Сообщите администратору, что неизвестный peer_type',$v_peer['conversation']['peer']['type']);
             }
             
+            // dd($a_peers);
             //Получение данных по конкретному диалогу
             $params= array(             
             'offset' => 0,
@@ -144,8 +144,7 @@ class BnipMessageController extends Controller
             $messagesGetHistory = VK::messagesGetHistory($this->token_group_kndm,$params,Null);
 
             if($this->mode_debug) { dump($messagesGetHistory); }
-            if($this->mode_debug) { dump('кол-во сообщений', $messagesGetHistory['count']); }
-            
+            if($this->mode_debug) { dump('кол-во сообщений', $messagesGetHistory['count']); }            
                         
             //перебираем сообщения
             foreach ($messagesGetHistory['items'] as $k_history => $v_history) {
@@ -164,7 +163,6 @@ class BnipMessageController extends Controller
                     $fromName = $Usersvk->firstname.' '.$Usersvk->lastname;
                 }                 
                 $a_peers[$k_peer]['messages'][$k_history]['from_name']=$fromName;
-                //$a_peers[$k_peer]['messages'][$k_history]['admin_author_name']=$adminAuthorName;
 
                 //Проверяем все вложения
                 if (!empty($v_history['attachments'])) {                    

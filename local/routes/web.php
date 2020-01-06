@@ -57,6 +57,9 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	Route::post('/message','Komuche_ndm\MessageController@view')->name('view_message');
 	Route::post('/message/processing','Komuche_ndm\MessageController@processing_message')->name('processing_message');
 
+	Route::post('/postmessage/find','Komuche_ndm\FindPostsController@processing')->name('find_posts');
+	
+
 });
 
 //callback
