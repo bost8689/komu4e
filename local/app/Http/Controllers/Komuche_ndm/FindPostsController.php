@@ -66,7 +66,7 @@ class FindPostsController extends Controller
 
         	$Postmessages = Postmessage::with('photospostmessage','usersvk','user')->where('usersvk_id', $Usersvk->id)->where('date','>',$date_begin.' 00:00:01')->orderBy('date', 'desc')->get();
             dump($Postmessages);
-        	return view('komuche_ndm.findposts.processing_FindPostmessage',['Postmessages'=>$Postmessages,'Usersvk'=>$Usersvk]);            
+        	return view('komuche_ndm.findposts.processing_findpostmessage',['Postmessages'=>$Postmessages,'Usersvk'=>$Usersvk]);            
 
         }
 
