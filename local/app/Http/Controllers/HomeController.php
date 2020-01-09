@@ -32,6 +32,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // dump('test');
+        // dd(config('vk.TOKENMODERATOR'));
         //проверяем наличие файла с ошибками
         $path = storage_path('logs\laravel*.log'); 
         $fileError=[];  
