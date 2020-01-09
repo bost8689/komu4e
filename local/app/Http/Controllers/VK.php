@@ -19,7 +19,7 @@ class VK extends Controller
         //dump('test');
     }
 
-    	//пользователь
+    	//Получение данных пользователя
         static function usersGet($access_token,array $params,$data)
     {        
     	usleep(300000);
@@ -282,7 +282,8 @@ class VK extends Controller
 	'owner_id' => $count, 	
 	)*/
 
-	    static function messagesSend($access_token,$params,$data)
+	//отправка сообщений
+	static function messagesSend($access_token,$params,$data)
     {        
 	    $vk = new VKApiClient();
 	    try { 
@@ -302,6 +303,80 @@ class VK extends Controller
     'message' => $message, //220409092 Вячеслав Тихонов
     //'group_ids' => $group_ids,	
 	)*/
+
+	//Одобряем заявку пользователя в группу
+	static function groupsApproveRequest($access_token,$params,$data)
+    {        
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->groups()->approveRequest($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
+
+    //Проверяем состоит ли пользователь в группе
+	static function groupsisMember($access_token,$params,$data)
+    {        
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->groups()->isMember($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
+    //получить заявки в группе
+    	static function groupsgetRequests($access_token,$params,$data)
+    {        
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->groups()->getRequests($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
+
+    //Разблокировать пользователя
+    	static function groupsUnban($access_token,$params,$data)
+    {        
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->groups()->unban($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
+
+    //Разблокировать пользователя
+    	static function messagesMarkAsAnsweredConversation($access_token,$params,$data)
+    {      
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->messages()->markAsAnsweredConversation($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
 
 
 }//class

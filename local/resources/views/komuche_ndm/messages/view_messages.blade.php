@@ -20,11 +20,14 @@
                  
               <input type="hidden" name="messages[{{$loop->index}}][usersvk_id]" value="{{$peer['Usersvk']->id}}">
               <input type="hidden" name="messages[{{$loop->index}}][user_id]" value="{{$peer['Usersvk']->user_id}}">
+              <input type="hidden" name="messages[{{$loop->index}}][peer_id]" value="{{$peer['conversation']['peer']['id']}}">
+               
             </div>
             <div class="card-body">              
               @if(isset($peer['banUsersvk']))
               <div class="alert alert-danger" role="alert">
-              Внимание: Пользователь заблокирован 
+              Внимание: Пользователь заблокирован до {{date('d-m-Y',$peer['banUsersvk']['ban_info']['end_date'])}}<br>
+              {{$peer['banUsersvk']['ban_info']['comment']}}
               </div>
               @endif                             
               <textarea class="form-control normal" rows = "0" name="messages[{{$loop->index}}][text_send]"></textarea> 
@@ -36,6 +39,7 @@
               <option value=ПринятьВГруппу>Принять в группу</option>
               <option value=Разблокировать>Разблокировать</option>
               <option value=ОшибкаГруппой>Ошибка группой</option>
+              <option value=ПометитьКакОтвеченную>Пометить как отвеченную</option>
               </select>
               </div> 
                

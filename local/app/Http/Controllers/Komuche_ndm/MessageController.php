@@ -18,6 +18,7 @@ use Komu4e\User;
 use Auth;
 use Log;
 use Session;
+use Lang;
 
 use VK\CallbackApi\LongPoll\VKCallbackApiLongPollExecutor;
 use VK\CallbackApi\VKCallbackApiHandler;
@@ -45,9 +46,12 @@ class MessageController extends Controller
     public $log_write = 0; //публикация логов //if($this->log_write){}
     public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komuche_ndm_message'; //публикация логов //if($this->log_name){} 
-    private $token_moderator = Null;
-    private $group_id_kndm = Null;
-    private $token_group_kndm = Null;
+    private $token_moderator;
+    private $group_id_kndm;
+    private $token_group_kndm;
+    private $Usersvk;
+    private $message;
+    private $requests = array(); //массив заявко
 
     public function __construct(Request $request)
     {
@@ -66,25 +70,26 @@ class MessageController extends Controller
         }  
     }
 
+    //Проверить забанен ли юзер
+    public function checkUserBannedGroups (){
+        //проверяю забанен ли пользователь
+        $params = array(             
+        'group_id' => config('vk.group_id_kndm1'), //в объявлениях
+        'offset' => 0,
+        'count' => 1,// 
+        'fields' => 0,//1 – возвращать сообщения в хронологическом порядке. 0 – возвращать сообщения в обратном хронологическом порядке (по умолчанию).
+        'owner_id' => $this->Usersvk->user_id,   
+        );
+        $groupsGetBanned = VK::groupsGetBanned(config('vk.token_group_kndm1'),$params,Null);
+        return $groupsGetBanned;
+    }
 
-	//отображение сообщений
-    public function view(Request $request){
-
-        if(empty($request->input('group_type'))){
-            return redirect()->route('home');
-        }
-
-        //dd($request->all()); 
-        if($this->mode_debug) {dump('MessageController.view');}         
-        if($this->log_write){Log::channel($this->log_name)->info('тест лог');}
-        $c_peers = collect([]);    
-        //dump($this->group_id_kndm);
-        //dump($this->group_id_kndm);
-
+    //получить диалоги с не прочитанными сообщениями и сформировать
+    public function getPeers (){
         $params = array(
         'offset' => 0,
-        'count' => 20, //по умолчанию 20, мах 200
-        'filter' => 'unread',
+        'count' => 30, //по умолчанию 20, мах 200
+        'filter' => 'unanswered',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
         // important — беседы, помеченные как важные (только для сообщений сообществ);
@@ -96,14 +101,54 @@ class MessageController extends Controller
         );
         //dd($this->token_group_kndm);
         $messagesGetConversations = VK::messagesGetConversations($this->token_group_kndm,$params,Null);
+        return $messagesGetConversations;
+    }
+
+    //получение истории диалога
+    public function messagesGetHistory(){
+         $params= array(             
+        'offset' => 0,
+        'count' => 6,
+        'user_id' => $this->Usersvk->user_id,// 
+        'rev' => 0,//1 – возвращать сообщения в хронологическом порядке. 0 – возвращать сообщения в обратном хронологическом порядке (по умолчанию).
+        'group_id' => $this->group_id_kndm,//          
+        );         
+        $messagesGetHistory = VK::messagesGetHistory($this->token_group_kndm,$params,Null);
+        return $messagesGetHistory;
+    }
+
+    private function dataGenerationForView(){
+
+    }
+
+    private function getUsersInDB(){
+
+    }
+
+	//отображение сообщений
+    public function view(Request $request){
+
+        $result_view = array();
+        $c_peers = collect([]);
+
+        if(empty($request->input('group_type'))){
+            return redirect()->route('home');
+        }
+
+        //получить диалоги
+        $get_peers = $this->getPeers();
         //коллекция кол-во диалогов
         $c_peers->put('group_type', $request->input('group_type'));
-        $c_peers->put('countPeers', $messagesGetConversations['count']);
-        foreach ($messagesGetConversations['items'] as $k_peer => $v_peer) { 
+        $c_peers->put('countPeers', $get_peers['count']);
+        $result_view=['group_type'=>$request->input('group_type')];
+        $result_view=['count_peers'=>$get_peers['count']];
+        // dump($c_peers);
+        // dd($result_view);
+
+        foreach ($get_peers['items'] as $k_peer => $v_peer) { 
             //присвоение данных          
             if($this->mode_debug) { dump($v_peer); }
             $a_peers[$k_peer]=$v_peer;
-            
             $peer_type = $v_peer['conversation']['peer']['type']; //user или ???
             $userId = $v_peer['conversation']['peer']['id'];
             if($peer_type=='user'){
@@ -118,21 +163,29 @@ class MessageController extends Controller
                     $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);                    
                     
                 }
+                $this->Usersvk = $Usersvk;
                 $a_peers[$k_peer]['Usersvk']=$Usersvk;
 
-                //проверяю забанен ли пользователь
-                $params = array(             
-                'group_id' => config('vk.group_id_kndm1'),
-                'offset' => 0,
-                'count' => 1,// 
-                'fields' => 0,//1 – возвращать сообщения в хронологическом порядке. 0 – возвращать сообщения в обратном хронологическом порядке (по умолчанию).
-                'owner_id' => $userId,   
-                );
+                //проверяю забанен ли юзер
+                $checkUserBannedGroups = $this->checkUserBannedGroups();
+                /*array:2 [▼
+                "count" => 1
+                "items" => array:1 [▼
+                0 => array:3 [▼
+                "type" => "profile"
+                "profile" => array:5 [▶]
+                "ban_info" => array:6 [▼
+                "admin_id" => 206862242
+                "date" => 1578568492
+                "reason" => 0
+                "comment" => "ывавап"
+                "comment_visible" => false
+                "end_date" => 1581246892
+                ]*/
 
-                $getBanned = VK::groupsGetBanned(config('vk.token_group_kndm1'),$params,Null);
-
-                if(isset($getBanned)){
-                    $a_peers[$k_peer]['banUsersvk']=$getBanned['items'][0];    
+                dump($checkUserBannedGroups);
+                if(!empty($checkUserBannedGroups)) {
+                    $a_peers[$k_peer]['banUsersvk']=$checkUserBannedGroups['items'][0];    
                 }
 
             }
@@ -153,20 +206,26 @@ class MessageController extends Controller
             }
             
             //получение диалога
-            $params= array(             
-            'offset' => 0,
-            'count' => 6,
-            'user_id' => $userId,// 
-            'rev' => 0,//1 – возвращать сообщения в хронологическом порядке. 0 – возвращать сообщения в обратном хронологическом порядке (по умолчанию).
-            'group_id' => $this->group_id_kndm,//          
-            );            
-            $messagesGetHistory = VK::messagesGetHistory($this->token_group_kndm,$params,Null);
-            if($this->mode_debug) { dump($messagesGetHistory); }
-            if($this->mode_debug) { dump('кол-во сообщений', $messagesGetHistory['count']); }
-            
-            //dd('stop');           
-            //перебираем сообщения
+            $messagesGetHistory = $this->messagesGetHistory();
+            //пример получения данных
+            /*"count" => 3
+            "items" => array:3 [▼
+            0 => array:12 [▼
+            "date" => 1578511093
+            "from_id" => 392362811
+            "id" => 10690
+            "out" => 0
+            "peer_id" => 392362811
+            "text" => "Извините,ошиблась."
+            "conversation_message_id" => 4
+            "fwd_messages" => []
+            "important" => false
+            "random_id" => 0
+            "attachments" => []
+            "is_hidden" => false*/
+
             foreach ($messagesGetHistory['items'] as $k_history => $v_history) {
+                
                 $a_peers[$k_peer]['messages'][$k_history]=$v_history;
 
                 //Узнаём кто автор сообщения из админов
@@ -273,7 +332,7 @@ class MessageController extends Controller
         if(!empty($a_peers)){
             $c_peers->put('peers',$a_peers);
         }  
-        if($this->mode_debug) { dump($c_peers); }         
+        dump($c_peers);        
         return view('komuche_ndm.messages.view_messages',['c_peers' => $c_peers]); 
         //dump($messagesGetHistory);
 
@@ -281,8 +340,13 @@ class MessageController extends Controller
 
     //обработка полученных данных
     public function processing_message(Request $request){
-        //if($this->mode_update) {dump('MessageController.processing');}  
+        //if($this->mode_update) {dump('MessageController.processing');} 
 
+        //получаю все команды на языке 
+        $replyCommands = Lang::get('messages\replyCommands');
+        
+
+        //dd($request->input('messages'));
         //dd($request->input());
         $messages=$request->input('messages');
 
@@ -299,67 +363,55 @@ class MessageController extends Controller
                 $photo = $usersGet[0]['photo_100'];
                 $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);
             }
+            $this->Usersvk = $Usersvk;
 
             if(!empty($vMessage['status'])){
                 switch ($vMessage['status']) {
                     case 'Реквизиты':
-                        $message = '1. Перед каждой оплатой уточняйте реквизиты.                        
-                        2. В комментариях платежа ничего писать не надо.
-                        3. Для 2 типа размещения (постов от своего имени: ) После оплаты ожидайте от нас ответа, что Вас добавили в программу и только после этого можно будет размещать информацию, иначе программа заблокирует Вас.
-                        
-                        Сбербанк 5336 6901 8112 0454
-                        Яндекс деньги 4100 134 9075 1099
-
-                        4. После оплаты напишите, что отправили: сумму, на какую карту отправили и Имя отправителя.';
-                        $this->send_message(array('message' => $message),$Usersvk);                       
+                        $this->message = $replyCommands['Реквизиты'];
+                        $this->messagesSend(Null);                       
                         break;
                     case 'Прайс':
-                        $message = 'Информационный пост в сообществе "КомуЧё Объявления Надым" в социальной сети ВКонтакте, vk.com/komuche 
-
-                        Типы размещения:
-                        1. Закрепление записи в шапке группы. 1200 руб. на сутки. Никаких ссылок (ссылку можно только в комментариях под записью), только текст и картинка. Запись видна всем и в закреплении будет одна единственная ваша запись. Закрепление записи происходит в Прайм-тайм с 21:00 до 22:00.
-                        Оплату и информацию для закрепа просим предоставлять за 3 дня до размещения. Если материал и оплата не поступила за 3 дня мы в праве отменить бронирование. 
-
-                        2. Размещение одного информационного поста (с интервалом 1 сообщение в сутки) на стене от вашего имени, размещаете лично в удобное для вас время = 100 руб. Размещение не более одного раза в сутки. 
-
-                        3. Размещение одного рекламного поста на стене от имени группы в любое время (выбираете лично) = 390 руб. 
-
-                        4. Размещение визитки в фотоальбоме "Визитки" который будет виден при прямом просмотре группы В КомуЧё объявления и через меню группы. Стоимость размещения на один месяц 300 рублей. 
-
-                        Как сделать заказ? 
-                        1. После выбора типа размещения, высылаете номер типа размещения и вашу информацию, которую будете размещать для согласования. Запрещено размещать рекламу алкоголя, табака, информацию сексуального характера, а так же нарушающую ФЗ "О рекламе" и правила "ВКонтакте"
-                        2. После согласования информации Вам высылают реквизиты на оплату. 
-                        Способы оплаты удобным для Вас способом: 
-                        Перевод денежных средств на карту Сбербанк, Газпромбанк, Yandex деньги. 
-
-                        С Уважением команда КомуЧё';
-                        $this->send_message(array('message' => $message),$Usersvk); 
+                        $this->message = $replyCommands['Прайс'];                        
+                        $this->messagesSend(Null); 
                         break;
-                    case 'ПринятьВГруппу':
-                        //code принять в группу 
-
-                        // $message = 'ПринятьВГруппу';
-                        // $this->send_message(array('message' => $message),$Usersvk); 
+                    case 'ПринятьВГруппу':                        
+                        if(!$this->groupsisMember(Null)){ //проверяю состоит ли в группе
+                            if ($this->checkRequestGroup()) { //проверяю есть ли от него заявка
+                                dump('есть от человека заявка принимаем');
+                                $addUserGroup=$this->addUserGroup(Null);
+                                if ($addUserGroup) { //добавляю в группу
+                                    dump('Добавили');
+                                    $this->message = $replyCommands['ПринятьВГруппу'];                        
+                                    $this->messagesSend(Null);
+                                } 
+                            }
+                            else{
+                                dump('нет от человека заявки');
+                                $this->message = $replyCommands['НетЗаявкиВГруппе'];                        
+                                $this->messagesSend(Null); 
+                            }
+                        }                          
                         break;
                     case 'Разблокировать': 
-                        //code Разблокировать                       
-                        // $message = 'Разблокировали';
-                        // $this->send_message(array('message' => $message),$Usersvk);
+                        //проверяем заблокирован ли пользователь
+                        $checkUserBannedGroups = $this->checkUserBannedGroups();
+                        if(!empty($checkUserBannedGroups)) {
+                            // $a_peers[$k_peer]['banUsersvk']=$checkUserBannedGroups['items'][0];                            
+                            if($this->groupsUnban(Null)){ //разблокировать пользователя
+                                $this->message = $replyCommands['Разблокировать'];                        
+                                $this->messagesSend(Null);
+                            }
+                        }                  
                         break; 
                     case 'ОшибкаГруппой': 
-                        //code Разблокировать                       
-                        $message = 'Здравствуйте, вы написали к нам в сообщения сообщества , объявления размещать надо на стене в сообществе КомуЧё Объявления - https://vk.com/komuche.
-                        С Уважением команда КомуЧё 
-                        Наши сообщества: 
-                        КомуЧё Надым - городское сообщество. vk.com/komuche_nadym 
-                        КомуЧё Авто - попутчики, грузо и пассажироперевозки 
-                        https://vk.com/auto_nadym 
-                        КомуЧё Потеряшка - бюро находок и потерь https://vk.com/bnip_nadym 
-                        КомуЧё Мамочки 
-                        https://vk.com/komuche_mamomochki 
-                        КомуЧё Объявления - https://vk.com/komuche';
-                        $this->send_message(array('message' => $message),$Usersvk); 
-                        break;                     
+                        $this->message = $replyCommands['ОшибкаГруппой'];                        
+                        $this->messagesSend(Null); 
+                        break;
+                    case 'ПометитьКакОтвеченную':                      
+                        
+                        dd($this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]));
+                        break;
                     default:
                         dump([$vMessage,'status'=>$vMessage['status'],'неизвестный status']);
                         break;
@@ -370,22 +422,123 @@ class MessageController extends Controller
                 //dump([$vMessage,$vMessage['status'],'Статус empty']);
             }
 
-            if(!empty($vMessage['text_send'])){                
-                $this->send_message(array('message' => $vMessage['text_send']),$Usersvk);
+            if(!empty($vMessage['text_send'])){     
+                $this->message = $vMessage['text_send'];             
+                $this->messagesSend(Null);
             } 
 
         }
-        return redirect()->route('home'); 
+        //return redirect()->route('home'); 
 
     }
-    public function send_message(array $arrData,$Usersvk){
+
+    //добавляем человека в группу
+    public function addUserGroup($data){
+        $params = array(
+            'group_id' => config('vk.group_id_kndm1'), //220409092 Вячеслав Тихонов
+            'user_id' => $this->Usersvk->user_id,
+        );
+        $groupsApproveRequest = VK::groupsApproveRequest($this->token_moderator,$params,Null); 
+        return $groupsApproveRequest;
+    }
+
+    //отправка сообщения пользователю
+    public function messagesSend($data){
         $params = array(             
-            'user_id' => $Usersvk->user_id,
-            'message' => $arrData['message'], //220409092 Вячеслав Тихонов
+            'user_id' => $this->Usersvk->user_id,
+            'message' => $this->message, //220409092 Вячеслав Тихонов
             'random_id'=> rand(), //рандомное число
             //'group_ids' => $group_ids,    
         );
-        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);       
+        $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);
+        return $messagesSend;     
     }
+
+    //Проверяем состоит ли пользователь в группе true
+    public function groupsisMember($data){
+        $params = array(             
+            'group_id' => config('vk.group_id_kndm1'),
+            'user_id' => $this->Usersvk->user_id, //220409092 Вячеслав Тихонов
+            //'user_ids'=> Null, //рандомное число
+            //'group_ids' => $group_ids,    
+        );
+        $groupsisMember = VK::groupsisMember($this->token_moderator,$params,Null);   
+        dump(['$groupsisMember' => $groupsisMember]);
+        return $groupsisMember;    
+    }
+
+
+    //получить список заявок  в группе
+    public function groupsgetRequests($data){
+        $params = array(             
+            'group_id' => config('vk.group_id_kndm1'),
+            'offset' => $data['offset'], //смещение
+            'count' =>  $data['count'], //макс 200
+            'fields' => $data['fields'], //дополнительные поля
+      
+        );
+        $groupsgetRequests = VK::groupsgetRequests($this->token_moderator,$params,Null);   
+        return $groupsgetRequests;    
+    }
+
+    //проверяем есть ли пользователь среди всех заявок True False
+    public function checkRequestGroup(){
+        $offset=0; $count=0; $n=0;
+        //если ниразу не создавал список, то создаю массив
+        if (empty($this->requests)) {  
+            dump('мой список пустой');           
+            $getRequests = $this->groupsgetRequests(array('offset'=>$offset,'count'=>200,'fields'=>Null)); 
+            while (intval($getRequests['count']/200) >= $n) {
+                if ($n>0) {
+                    $getRequests = $this->groupsgetRequests(array('offset'=>$offset=$offset+200,'count'=>200,'fields'=>Null));
+                }                
+                foreach ($getRequests['items'] as $k_items => $user_id) {
+                    $this->requests[]=$user_id; //собираю свой массив заявок в группу
+                }            
+                $n++;
+            }
+        }
+        else{
+            dump('мой список уже сформирован');
+        }
+        //сравниваю уже по ранее созданному массиву заявок 
+        foreach ($this->requests as $key => $user_id) {
+            if($user_id==$this->Usersvk->user_id){
+                dump(['Найдено заявка от пользователя',$key,$user_id,$this->Usersvk->user_id]);
+                return true;
+            }
+            else{
+                dump(['Заявка не найдена']);
+            }
+        } 
+        return false;  
+    }
+
+    //получить список заявок  в группе
+    public function groupsUnban($data){
+        $params = array(             
+            'group_id' => config('vk.group_id_kndm1'),
+            'owner_id' => $this->Usersvk->user_id,
+        );
+        $groupsUnban = VK::groupsUnban($this->token_moderator,$params,Null);
+        return $groupsUnban;    
+    }
+
+    //Помечает беседу как отвеченую
+    public function messagesMarkAsAnsweredConversation($data){
+        $params = array(             
+            'peer_id' => $data['peer_id'],
+            'answered' => 0, //1 - беседа отмечена отвеченной, 0 - неотвеченной
+            'group_id' => $this->group_id_kndm, 
+        );
+        $messagesMarkAsAnsweredConversation = VK::messagesMarkAsAnsweredConversation($this->token_moderator,$params,Null);
+        return $messagesMarkAsAnsweredConversation;    
+    }
+
+
+    
+
+
+
 
 }//end class
