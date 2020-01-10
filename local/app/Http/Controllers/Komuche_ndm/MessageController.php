@@ -1,6 +1,7 @@
 <?php
 
 namespace Komu4e\Http\Controllers\Komuche_ndm;
+set_time_limit(60);
 
 use Illuminate\Http\Request;
 use Komu4e\Http\Controllers\Controller;
@@ -531,7 +532,7 @@ class MessageController extends Controller
             'answered' => 0, //1 - беседа отмечена отвеченной, 0 - неотвеченной
             'group_id' => $this->group_id_kndm, 
         );
-        $messagesMarkAsAnsweredConversation = VK::messagesMarkAsAnsweredConversation($this->token_moderator,$params,Null);
+        $messagesMarkAsAnsweredConversation = VK::messagesMarkAsAnsweredConversation( $this->token_group_kndm,$params,Null);
         return $messagesMarkAsAnsweredConversation;    
     }
 

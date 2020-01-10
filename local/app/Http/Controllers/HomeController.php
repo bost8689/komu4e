@@ -35,7 +35,7 @@ class HomeController extends Controller
         // dump('test');
         // dd(config('vk.TOKENMODERATOR'));
         //проверяем наличие файла с ошибками
-        $path = storage_path('logs\laravel*.log'); 
+        $path = storage_path('logs/laravel*.log'); 
         $fileError=[];  
         foreach(glob($path) as $file) { 
         // далее получаем последний добавленный/измененный файл      
