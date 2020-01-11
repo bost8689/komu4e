@@ -376,6 +376,10 @@ class MessageController extends Controller
                         $this->message = $replyCommands['Прайс'];                        
                         $this->messagesSend(Null); 
                         break;
+                    case 'РекламаОдобрена':
+                        $this->message = $replyCommands['РекламаОдобрена'];                        
+                        $this->messagesSend(Null); 
+                        break;
                     case 'ПринятьВГруппу':                        
                         if(!$this->groupsisMember(Null)){ //проверяю состоит ли в группе
                             if ($this->checkRequestGroup()) { //проверяю есть ли от него заявка

@@ -40,6 +40,7 @@
               <option value=ПринятьВГруппу>Принять в группу</option>
               <option value=Разблокировать>Разблокировать</option>
               <option value=ОшибкаГруппой>Ошибка группой</option>
+              <option value=РекламаОдобрена>Реклама одобрена</option>
               <option value=ПометитьКакОтвеченную>Пометить как отвеченную</option>
               </select>
               </div> 
