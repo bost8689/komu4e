@@ -13,7 +13,7 @@ use Komu4e\Http\Controllers\VK;
 use Komu4e\Model\Komuche_ndm\Usersvk;
 //use Komu4e\Model\Komuche_ndm\Postmessage;
 //use Komu4e\Model\Komuche_ndm\Photospostmessage;
-//use Komu4e\Model\Komuche_ndm\Settings;
+use Komu4e\Model\Komuche_ndm\Settings;
 
 use Komu4e\User;
 use Auth;
@@ -56,6 +56,11 @@ class MessageController extends Controller
 
     public function __construct(Request $request)
     {
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+
         $this->token_moderator=config('vk.token_moderator');
         switch ($request->input('group_type')) {
         case 'Объявления':
@@ -129,7 +134,7 @@ class MessageController extends Controller
 	//отображение сообщений
     public function view(Request $request){
 
-        $result_view = array();
+        // $result_view = array();
         $c_peers = collect([]);
 
         if(empty($request->input('group_type'))){
@@ -138,11 +143,12 @@ class MessageController extends Controller
 
         //получить диалоги
         $get_peers = $this->getPeers();
+
         //коллекция кол-во диалогов
         $c_peers->put('group_type', $request->input('group_type'));
         $c_peers->put('countPeers', $get_peers['count']);
-        $result_view=['group_type'=>$request->input('group_type')];
-        $result_view=['count_peers'=>$get_peers['count']];
+        // $result_view=['group_type'=>$request->input('group_type')];
+        // $result_view=['count_peers'=>$get_peers['count']];
         // dump($c_peers);
         // dd($result_view);
 
@@ -337,7 +343,7 @@ class MessageController extends Controller
         if(!empty($a_peers)){
             $c_peers->put('peers',$a_peers);
         }  
-        dump($c_peers);        
+        if($this->mode_debug) { dump($c_peers);}              
         return view('komuche_ndm.messages.view_messages',['c_peers' => $c_peers]); 
         //dump($messagesGetHistory);
 
@@ -348,8 +354,7 @@ class MessageController extends Controller
         //if($this->mode_update) {dump('MessageController.processing');} 
 
         //получаю все команды на языке 
-        $replyCommands = Lang::get('messages/replyCommands');
-        
+        $replyCommands = Lang::get('messages/replyCommands');        
 
         //dd($request->input('messages'));
         //dd($request->input());
@@ -387,16 +392,16 @@ class MessageController extends Controller
                     case 'ПринятьВГруппу':                        
                         if(!$this->groupsisMember(Null)){ //проверяю состоит ли в группе
                             if ($this->checkRequestGroup()) { //проверяю есть ли от него заявка
-                                dump('есть от человека заявка принимаем');
+                                if($this->mode_debug){dump('есть заявка - принимаем');}
                                 $addUserGroup=$this->addUserGroup(Null);
                                 if ($addUserGroup) { //добавляю в группу
-                                    dump('Добавили');
+                                    if($this->mode_debug){dump('добавили');}
                                     $this->message = $replyCommands['ПринятьВГруппу'];                        
                                     $this->messagesSend(Null);
                                 } 
                             }
                             else{
-                                dump('нет от человека заявки');
+                                if($this->mode_debug){dump('нет заявки');}                                
                                 $this->message = $replyCommands['НетЗаявкиВГруппе'];                        
                                 $this->messagesSend(Null); 
                             }
@@ -426,19 +431,13 @@ class MessageController extends Controller
                         $this->messagesSend(Null); 
                         break;
                     case 'ПометитьКакОтвеченную':
-                        dump($this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]));
-                        dump($this->messagesMarkAsRead(['peer_id'=>$vMessage['peer_id'],'start_message_id'=>$vMessage['last_message_id']]));
-                        
-                       
+                        $this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]);
+                        $this->messagesMarkAsRead(['peer_id'=>$vMessage['peer_id'],'start_message_id'=>$vMessage['last_message_id']]);
                         break;
                     default:
                         dump([$vMessage,'status'=>$vMessage['status'],'неизвестный status']);
                         break;
                 }
-                dump([$vMessage,'status'=>$vMessage['status'],'']);
-            }
-            else{
-                //dump([$vMessage,$vMessage['status'],'Статус empty']);
             }
 
             if(!empty($vMessage['text_send'])){     
@@ -447,7 +446,7 @@ class MessageController extends Controller
             } 
 
         }
-        //return redirect()->route('home'); 
+        return redirect()->route('home'); 
 
     }
 
@@ -481,8 +480,8 @@ class MessageController extends Controller
             //'user_ids'=> Null, //рандомное число
             //'group_ids' => $group_ids,    
         );
-        $groupsisMember = VK::groupsisMember($this->token_moderator,$params,Null);   
-        dump(['$groupsisMember' => $groupsisMember]);
+        $groupsisMember = VK::groupsisMember($this->token_moderator,$params,Null);
+        if($this->mode_debug){dump(['$groupsisMember' => $groupsisMember]);}
         return $groupsisMember;    
     }
 
@@ -504,8 +503,8 @@ class MessageController extends Controller
     public function checkRequestGroup(){
         $offset=0; $count=0; $n=0;
         //если ниразу не создавал список, то создаю массив
-        if (empty($this->requests)) {  
-            dump('мой список пустой');      
+        if (empty($this->requests)) { 
+            if($this->mode_debug){dump(['мой список пустой']);} 
             //получить список заявок  в группе 50,200     
             $getRequests = $this->groupsgetRequests(array('offset'=>$offset,'count'=>200,'fields'=>Null)); 
             while (intval($getRequests['count']/200) >= $n) {
@@ -521,18 +520,14 @@ class MessageController extends Controller
             }
         }
         else{
-            dump('мой список уже сформирован');
+            if($this->mode_debug){dump(['мой список уже сформирован']);} 
         }
         //сравниваю уже по ранее созданному массиву заявок 
-        dump(['Кол-во заявок',count($this->requests)]);
+        if($this->mode_debug){dump(['Кол-во заявок',count($this->requests)]);}        
         foreach ($this->requests as $key => $user_id) {
             if($user_id==$this->Usersvk->user_id){
-                dump(['Найдено заявка от пользователя',$key,$user_id,$this->Usersvk->user_id]);
                 return true;
             }
-            // else{
-            //     dump(['Заявка не найдена']);
-            // }
         } 
         return false;  
     }

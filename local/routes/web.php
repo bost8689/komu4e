@@ -58,7 +58,10 @@ Route::group(['middleware' => ['auth','permission']], function () {
 	Route::post('/message/processing','Komuche_ndm\MessageController@processing_message')->name('processing_message');
 
 	Route::post('/postmessage/find','Komuche_ndm\FindPostsController@processing')->name('find_posts');
-	
+
+	//Settings
+	Route::match(['get', 'post'],'/settings','Komuche_ndm\SettingsController@view')->name('view_settings');
+	Route::post('/settings/processing','Komuche_ndm\SettingsController@processing')->name('processing_settings');
 
 });
 
