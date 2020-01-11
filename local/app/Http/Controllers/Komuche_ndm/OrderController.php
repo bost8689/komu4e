@@ -25,6 +25,11 @@ class OrderController extends Controller
 
     public function __construct()
     {
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+        
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm=config('vk.group_id_kndm1');
     }

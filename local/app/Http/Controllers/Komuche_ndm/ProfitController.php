@@ -9,7 +9,7 @@ use Komu4e\Model\Komuche_ndm\Order;
 use Komu4e\Model\Komuche_ndm\Usersvk;
 // use Komu4e\Model\Komuche_ndm\Postmessage;
 // use Komu4e\Model\Komuche_ndm\Photospostmessage;
-// use Komu4e\Model\Komuche_ndm\Settings;
+use Komu4e\Model\Komuche_ndm\Settings;
 // use Komu4e\User;
 
 // use Komu4e\Http\Controllers\VK;
@@ -23,6 +23,11 @@ class ProfitController extends Controller
 
     public function __construct()
     {
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+        
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm=config('vk.group_id_kndm1');
     }

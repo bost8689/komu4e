@@ -56,7 +56,7 @@ use Intervention\Image\ImageManager;
 class BnipController extends Controller
 {	
     public $log_write = 1; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_bnip'; //публикация логов //if($this->log_name){}
     private $group_id_kndm = Null; //публикация логов //if($this->log_name){}
     private $token_moderator = Null;
@@ -66,6 +66,11 @@ class BnipController extends Controller
     
         public function __construct()
     {
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm=config('vk.group_id_kndm4'); //bnip
         $this->token_group_kndm=config('vk.token_group_kndm4'); //bnip        

@@ -30,7 +30,7 @@ use Log;
 
 class CallbackController extends Controller
 {	
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}    
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}    
     public $log_write = 1; //публикация логов //if($this->log_write){}
     public $log_name = 'komu4e_ndm_callback'; //публикация логов //if($this->log_name){}
     private $group_id_kndm = Null; //публикация логов //if($this->log_name){}
@@ -40,6 +40,12 @@ class CallbackController extends Controller
     
         public function __construct()
     {
+
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+
         $this->token_moderator=config('vk.token_moderator');
         $this->group_id_kndm=config('vk.group_id_kndm5');
 

@@ -12,7 +12,7 @@ use Komu4e\Http\Controllers\VK;
 use Komu4e\Model\Komuche_ndm\Usersvk;
 use Komu4e\Model\Komuche_ndm\Postmessage;
 //use Komu4e\Model\Komuche_ndm\Photospostmessage;
-//use Komu4e\Model\Komuche_ndm\Settings;
+use Komu4e\Model\Komuche_ndm\Settings;
 
 class FindPostsController extends Controller
 {
@@ -21,6 +21,18 @@ class FindPostsController extends Controller
     private $token_moderator = Null;
     private $group_id_kndm = Null;
     private $token_group_kndm = Null;
+
+
+        public function __construct()
+    {
+
+        $SettingsModeDebug=Settings::where('name','komu4e_ndm_debug_mode')->first();
+        if ($SettingsModeDebug->value2=="Включено") {
+            $this->mode_debug = 1;
+        }
+
+    }
+
 
         public function view(Request $request)
     {
