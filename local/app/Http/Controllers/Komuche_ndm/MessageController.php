@@ -90,7 +90,7 @@ class MessageController extends Controller
         $params = array(
         'offset' => 0,
         'count' => 30, //по умолчанию 20, мах 200
-        'filter' => 'unanswered',
+        'filter' => 'unread',
         // all — все беседы; 
         // unread — беседы с непрочитанными сообщениями;
         // important — беседы, помеченные как важные (только для сообщений сообществ);
@@ -184,7 +184,7 @@ class MessageController extends Controller
                 "end_date" => 1581246892
                 ]*/
 
-                dump($checkUserBannedGroups);
+                //dump($checkUserBannedGroups);
                 if(!empty($checkUserBannedGroups)) {
                     $a_peers[$k_peer]['banUsersvk']=$checkUserBannedGroups['items'][0];    
                 }
@@ -409,9 +409,11 @@ class MessageController extends Controller
                         $this->message = $replyCommands['ОшибкаГруппой'];                        
                         $this->messagesSend(Null); 
                         break;
-                    case 'ПометитьКакОтвеченную':                      
+                    case 'ПометитьКакОтвеченную':
+                        dump($this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]));
+                        dump($this->messagesMarkAsRead(['peer_id'=>$vMessage['peer_id'],'start_message_id'=>$vMessage['last_message_id']]));
                         
-                        dd($this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]));
+                       
                         break;
                     default:
                         dump([$vMessage,'status'=>$vMessage['status'],'неизвестный status']);
@@ -487,12 +489,15 @@ class MessageController extends Controller
         $offset=0; $count=0; $n=0;
         //если ниразу не создавал список, то создаю массив
         if (empty($this->requests)) {  
-            dump('мой список пустой');           
+            dump('мой список пустой');      
+            //получить список заявок  в группе 50,200     
             $getRequests = $this->groupsgetRequests(array('offset'=>$offset,'count'=>200,'fields'=>Null)); 
             while (intval($getRequests['count']/200) >= $n) {
                 if ($n>0) {
+                    sleep(1);
                     $getRequests = $this->groupsgetRequests(array('offset'=>$offset=$offset+200,'count'=>200,'fields'=>Null));
-                }                
+                }       
+                // dump($getRequests );         
                 foreach ($getRequests['items'] as $k_items => $user_id) {
                     $this->requests[]=$user_id; //собираю свой массив заявок в группу
                 }            
@@ -503,19 +508,20 @@ class MessageController extends Controller
             dump('мой список уже сформирован');
         }
         //сравниваю уже по ранее созданному массиву заявок 
+        dump(['Кол-во заявок',count($this->requests)]);
         foreach ($this->requests as $key => $user_id) {
             if($user_id==$this->Usersvk->user_id){
                 dump(['Найдено заявка от пользователя',$key,$user_id,$this->Usersvk->user_id]);
                 return true;
             }
-            else{
-                dump(['Заявка не найдена']);
-            }
+            // else{
+            //     dump(['Заявка не найдена']);
+            // }
         } 
         return false;  
     }
 
-    //получить список заявок  в группе
+    //разблокировка пользователя в группе
     public function groupsUnban($data){
         $params = array(             
             'group_id' => config('vk.group_id_kndm1'),
@@ -529,12 +535,26 @@ class MessageController extends Controller
     public function messagesMarkAsAnsweredConversation($data){
         $params = array(             
             'peer_id' => $data['peer_id'],
-            'answered' => 0, //1 - беседа отмечена отвеченной, 0 - неотвеченной
+            'answered' => 1, //1 - беседа отмечена отвеченной, 0 - неотвеченной
             'group_id' => $this->group_id_kndm, 
         );
         $messagesMarkAsAnsweredConversation = VK::messagesMarkAsAnsweredConversation( $this->token_group_kndm,$params,Null);
         return $messagesMarkAsAnsweredConversation;    
     }
+
+    //Помечает беседу как прочитанную
+    public function messagesMarkAsRead($data){
+        $params = array(             
+            // 'message_ids' => $data['message_ids'],
+            'peer_id' => $data['peer_id'], //
+            'start_message_id' =>$data['start_message_id'], 
+            'group_id'=>$this->group_id_kndm,
+        );
+        $messagesMarkAsRead = VK::messagesMarkAsRead( $this->token_group_kndm,$params,Null);
+        return $messagesMarkAsRead;    
+    }
+
+
 
 
     

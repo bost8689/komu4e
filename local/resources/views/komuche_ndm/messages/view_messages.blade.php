@@ -21,7 +21,8 @@
               <input type="hidden" name="messages[{{$loop->index}}][usersvk_id]" value="{{$peer['Usersvk']->id}}">
               <input type="hidden" name="messages[{{$loop->index}}][user_id]" value="{{$peer['Usersvk']->user_id}}">
               <input type="hidden" name="messages[{{$loop->index}}][peer_id]" value="{{$peer['conversation']['peer']['id']}}">
-               
+              <input type="hidden" name="messages[{{$loop->index}}][last_message_id]" value="{{$peer['last_message']['id']}}">
+
             </div>
             <div class="card-body">              
               @if(isset($peer['banUsersvk']))

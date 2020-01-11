@@ -363,12 +363,27 @@ class VK extends Controller
 		}
     } 
 
-    //Разблокировать пользователя
+    //пометить диалог как отвеченный
     	static function messagesMarkAsAnsweredConversation($access_token,$params,$data)
     {      
 	    $vk = new VKApiClient();
 	    try { 
 			$response = $vk->messages()->markAsAnsweredConversation($access_token, $params);
+	    	return $response;
+		} catch (VKApiException $e) {
+			dump($e->getMessage(),$params,$data);
+			// if(!empty($data['log_name'])){
+			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
+			// }			
+		}
+    } 
+
+        //пометить диалог как отвеченный
+    	static function messagesMarkAsRead($access_token,$params,$data)
+    {      
+	    $vk = new VKApiClient();
+	    try { 
+			$response = $vk->messages()->markAsRead($access_token, $params);
 	    	return $response;
 		} catch (VKApiException $e) {
 			dump($e->getMessage(),$params,$data);
