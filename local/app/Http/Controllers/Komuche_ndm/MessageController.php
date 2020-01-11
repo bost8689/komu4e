@@ -407,6 +407,10 @@ class MessageController extends Controller
                                 $this->message = $replyCommands['Разблокировать'];                        
                                 $this->messagesSend(Null);
                             }
+                        }
+                        else{ //если пользователь уже разблокирован
+                            $this->message = $replyCommands['Разблокировать'];                        
+                            $this->messagesSend(Null);
                         }                  
                         break; 
                     case 'ОшибкаГруппой': 
