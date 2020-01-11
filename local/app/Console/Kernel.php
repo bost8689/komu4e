@@ -28,11 +28,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')
-        /*$schedule->call(function () {
+        $schedule->call(function () {
             $UpdateEventController = new UpdateEventController();
             $result = $UpdateEventController->getEvent();
             //Log::channel('UpdateEventController')->info(['Запуск $UpdateEventController->getEvent'=>$result]);
-        })->everyMinute();*/
+        })->everyMinute();
     }
 
     /**

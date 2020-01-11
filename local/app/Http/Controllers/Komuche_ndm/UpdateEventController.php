@@ -32,7 +32,7 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 class UpdateEventController extends Controller
 {	
     public $log_write = 0; //публикация логов //if($this->log_write){}
-    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
@@ -140,6 +140,23 @@ class UpdateEventController extends Controller
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);
         $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs);         
         if($this->mode_debug){dump($result_executor);}
+
+/*              "type" => "wall_post_new"
+      "object" => array:11 [▼
+        "id" => 1887562
+        "from_id" => 220409092
+        "owner_id" => -46590816
+        "date" => 1578755679
+        "marked_as_ads" => 0
+        "post_type" => "post"
+        "text" => "Продам гитару , обычная 6 струнная за 5000 руб."
+        "can_edit" => 1
+        "created_by" => 220409092
+        "can_delete" => 1
+        "comments" => array:1 [▶]
+      ]
+      "group_id" => 46590816
+      "event_id" => "7c3bdffb8471106dd3b04d3d4537c2713641f2c6"*/
         //перебираем последние события
         //Формирую массивы событий по их типу
         $wallPostNew = array();
