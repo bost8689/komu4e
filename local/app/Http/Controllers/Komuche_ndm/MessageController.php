@@ -149,10 +149,12 @@ class MessageController extends Controller
         foreach ($get_peers['items'] as $k_peer => $v_peer) { 
             //присвоение данных          
             if($this->mode_debug) { dump($v_peer); }
-            $a_peers[$k_peer]=$v_peer;
+            
             $peer_type = $v_peer['conversation']['peer']['type']; //user или ???
-            $userId = $v_peer['conversation']['peer']['id'];
+            
             if($peer_type=='user'){
+                $a_peers[$k_peer]=$v_peer;
+                $userId = $v_peer['conversation']['peer']['id'];
                 //ищем у себя этого пользователя, если нет, то добавляем
                 $Usersvk = Usersvk::where('user_id',$userId)->first();
                 if(!isset($Usersvk)){ 
@@ -190,20 +192,22 @@ class MessageController extends Controller
                 }
 
             }
-            else{
-                dump('Сообщите администратору, что неизвестный peer_type');
-                //ищем у себя этого пользователя, если нет, то добавляем
-                $Usersvk = Usersvk::where('user_id',$userId)->first();
-                if(!isset($Usersvk)){ 
-                    $params = array('user_ids' => $userId,'fields' => 'photo_100');
-                    $usersGet = VK::usersGet($this->token_moderator,$params,Null);
-                    $firstName = $usersGet[0]['first_name'];
-                    $lastName = $usersGet[0]['last_name'];
-                    $photo = $usersGet[0]['photo_100'];
-                    $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);                    
+            elseif($peer_type=='chat'){
+                continue;
+                // dd($get_peers);
+                // dump('Сообщите администратору, что неизвестный peer_type');
+                // //ищем у себя этого пользователя, если нет, то добавляем
+                // $Usersvk = Usersvk::where('user_id',$userId)->first();
+                // if(!isset($Usersvk)){ 
+                //     $params = array('user_ids' => $userId,'fields' => 'photo_100');
+                //     $usersGet = VK::usersGet($this->token_moderator,$params,Null);
+                //     $firstName = $usersGet[0]['first_name'];
+                //     $lastName = $usersGet[0]['last_name'];
+                //     $photo = $usersGet[0]['photo_100'];
+                //     $Usersvk = Usersvk::create(['user_id'=>$userId,'firstname'=>$firstName,'lastname'=>$lastName,'photo'=>$photo]);                    
                     
-                }
-                $a_peers[$k_peer]['Usersvk']=$Usersvk;
+                // }
+                // $a_peers[$k_peer]['Usersvk']=$Usersvk;
             }
             
             //получение диалога

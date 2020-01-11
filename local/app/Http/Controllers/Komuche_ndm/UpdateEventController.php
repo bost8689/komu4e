@@ -32,7 +32,7 @@ class CallbackApiMyHandler extends VKCallbackApiHandler {
 class UpdateEventController extends Controller
 {	
     public $log_write = 0; //публикация логов //if($this->log_write){}
-    public $mode_debug = 0; //режим отлади //if($this->mode_debug){}
+    public $mode_debug = 1; //режим отлади //if($this->mode_debug){}
     public $log_name = 'komu4e_ndm_updatevent'; //для логирования
 
     //обновление ыы
@@ -139,7 +139,7 @@ class UpdateEventController extends Controller
         $handler = new CallbackApiMyHandler();          
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);
         $result_executor = $executor->getEvents($LongPollServer['server'],$LongPollServer['key'],$beginTs);         
-
+        if($this->mode_debug){dump($result_executor);}
         //перебираем последние события
         //Формирую массивы событий по их типу
         $wallPostNew = array();
