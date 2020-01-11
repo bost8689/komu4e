@@ -400,7 +400,11 @@ class MessageController extends Controller
                                 $this->message = $replyCommands['НетЗаявкиВГруппе'];                        
                                 $this->messagesSend(Null); 
                             }
-                        }                          
+                        }  
+                        else{
+                            $this->message = $replyCommands['ПринятьВГруппу'];                        
+                            $this->messagesSend(Null);
+                        }                        
                         break;
                     case 'Разблокировать': 
                         //проверяем заблокирован ли пользователь
