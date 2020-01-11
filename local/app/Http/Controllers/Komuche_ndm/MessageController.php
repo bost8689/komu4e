@@ -348,7 +348,7 @@ class MessageController extends Controller
         //if($this->mode_update) {dump('MessageController.processing');} 
 
         //получаю все команды на языке 
-        $replyCommands = Lang::get('messages\replyCommands');
+        $replyCommands = Lang::get('messages/replyCommands');
         
 
         //dd($request->input('messages'));
