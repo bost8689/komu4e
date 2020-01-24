@@ -9,7 +9,7 @@
       <form class="form-horizontal" role="form" action="{{route('processing_settings')}}" method="post"> 
         {{ csrf_field() }}
         
-          @if ($SettingsModeDebug->value2 == "Включить")
+          @if ($SettingsModeDebug->value2 == "Включено")
           <div class="alert alert-success" role="alert"> 
             Режим отладки включен
           @else
@@ -22,8 +22,8 @@
             <div class="col-sm-14">
               <select class="form-control" name="mode_debug">
                 <option value=""></option>
-                <option value="Включить">Включено</option>
-                <option value="Выключить">Выключено</option>
+                <option value="Включено">Включено</option>
+                <option value="Выключено">Выключено</option>
               </select>
             </div>
           </div>

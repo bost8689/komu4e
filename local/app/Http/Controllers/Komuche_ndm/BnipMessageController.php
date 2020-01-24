@@ -12,6 +12,7 @@ use Komu4e\Model\Komuche_ndm\Photosbnip;
 use Komu4e\Model\Komuche_ndm\Usersvk;
 //use Komu4e\Model\Komuche_ndm\Postmessage;
 //use Komu4e\Model\Komuche_ndm\Photospostmessage;
+use Komu4e\Model\Komuche_ndm\MessageController;
 use Komu4e\Model\Komuche_ndm\Settings;
 
 use Komu4e\User;
@@ -317,9 +318,21 @@ class BnipMessageController extends Controller
                     С Уважением команда КомуЧё';
                 $this->send_message(array('message' => $message),$Usersvk);
             }
+
             elseif($v_bnip['status']=='Повтор'){
                  $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
+                 $this->send_message(array('message' => $message),$Usersvk); }
+
+            elseif($v_bnip['status']=='ПометитьКакОтвеченную'){
+                // $MessageController = new MessageController();
+                // $result = $MessageController->getEvent();
+                // $this->messagesMarkAsAnsweredConversation(['peer_id'=>$vMessage['peer_id']]);
+                // $this->messagesMarkAsRead(['peer_id'=>$vMessage['peer_id'],'start_message_id'=>$vMessage['last_message_id']]);
+
+                 $message='Здравствуйте, Вашу похожую запись уже размещали, мы стараемся размещать только уникальные записи.'."\n".'С Уважением команда КомуЧё';
                  $this->send_message(array('message' => $message),$Usersvk);
+
+                 
 
 
                 //отправляю сообщение, что Вы ошиблись группой

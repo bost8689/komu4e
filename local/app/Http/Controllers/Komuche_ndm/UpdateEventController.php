@@ -25,6 +25,7 @@ use VK\Client\VKApiRequest;
 use VK\Exceptions\VKApiException;
 
 
+
 class CallbackApiMyHandler extends VKCallbackApiHandler { 
    
 }       
@@ -194,10 +195,6 @@ class UpdateEventController extends Controller
             'Кол-во новыйх событий $countNewTs'=>$countNewTs,
             'Кол-во новых $wallPostNew'=>count($wallPostNew),
         );      
-    }
-
-    public function writeEvent(){
-
     }
 
 }//end class

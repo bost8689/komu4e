@@ -69,14 +69,12 @@ class VK extends Controller
     	try { 
 			$response = $vk->wall()->delete($access_token, $params);
 		return $response;
-		} catch (VKApiException $e) {
-			dump('Сделайте пожалуйста скрин ошибки и сообщите администратору');
-			dump($e->getMessage(),$params,$data);
-			// if(!empty($data['log_name'])){
-			// 	Log::channel($data['log_name'])->error('VK',[$e->getMessage(),$params,$data]);
-			// }		
-		} 
-	    
+		} catch (VKApiException $e) {			
+			if($e->getMessage() != "Access to wall's post denied"){
+				dump('Сделайте пожалуйста скрин ошибки и сообщите администратору');
+				dump($e->getMessage(),$params,$data);	
+			}		
+		}	    
     } 
     //блокировка пользователя в группе
     static function groups_ban($access_token,array $params,$data)

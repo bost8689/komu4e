@@ -31,7 +31,8 @@
               <option value=Найдено>Найдено</option>
               <option value=Потеряно>Потеряно</option>
               <option value=Ошибка>Ошибка</option>
-              <option value=Повтор>Повтор</option>                  
+              <option value=Повтор>Повтор</option> 
+              <option value=ПометитьКакОтвеченную>Пометить как отвеченную</option>
               </select> 
               </div>
               @foreach ($peer['messages'] as $message)

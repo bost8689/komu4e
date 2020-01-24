@@ -152,9 +152,6 @@ class PostmessageController extends Controller
     //обновление
     public function writeWallPostNew(array $wallPostNews){ //входят обновления updates из UpdateEventController
             
-            //объявление пременных
-         //    $token_moderator=config('vk.token_moderator');
-        	// $group_id_kndm1=config('vk.group_id_kndm1');  
         	$countAddDBPostmessage = 0;
         	$countAddDBUsersvk = 0;
             $countAddDBPhotosPost = 0;

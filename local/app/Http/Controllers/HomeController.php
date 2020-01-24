@@ -3,7 +3,7 @@
 namespace Komu4e\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+//use Komu4e\Http\Controllers\MessageController;
 
 class HomeController extends Controller
 {
@@ -32,16 +32,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // dump('test');
-        // dd(config('vk.TOKENMODERATOR'));
-        //проверяем наличие файла с ошибками
+        return view('home',['fileError' => $this->checkFileError()]);    
+    }
+
+    //проверяем наличие файла с ошибками
+    public function checkFileError(){        
         $path = storage_path('logs/laravel*.log'); 
         $fileError=[];  
         foreach(glob($path) as $file) { 
         // далее получаем последний добавленный/измененный файл      
         $fileError[] = $file; // массив всех файлов       
-        }   
-        return view('home',['fileError' => $fileError]);    
-        //return view('home');
+        }
+        return $fileError;           
     }
 }
