@@ -325,6 +325,12 @@ class PostmessageController extends Controller
         foreach ($request->input('processing') as $k_processing => $v_processing) {
             $Usersvk = Usersvk::find($v_processing['usersvk_id']);
 
+            if(empty($v_processing['postmessage_id'])){
+                dump('ошибка k_processing',$k_processing);
+                dump('ошибка v_processing',$v_processing);
+                continue;
+            }
+
             foreach ($v_processing['postmessage_id'] as $postmessage_id => $command) {
                 $Postmessage = Postmessage::with('photospostmessage')->find($postmessage_id); //Нахожу по id этот пост у себя в БД
                 if ($command=='Удалить') {   
@@ -474,7 +480,7 @@ class PostmessageController extends Controller
             $Photo->typemax = $typeMax;
             $Photo->save();            
         }
-        if($this->mode_debug){dump($debug);}
+        //if($this->mode_debug){dump($debug);}
         return;   
     }
 

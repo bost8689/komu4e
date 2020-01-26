@@ -257,7 +257,7 @@ if($this->mode_debug) { dump($v_peer); }
 
               //Проверяем все вложения
           if (!empty($v_history['attachments'])) { 
-            dump($this->checkItemsPhoto(['attachments'=>$v_history['attachments']]));                   
+            if($this->mode_debug){dump($this->checkItemsPhoto(['attachments'=>$v_history['attachments']]));}
             foreach ($v_history['attachments'] as $k_attachments => $v_attachments) {
              if($v_attachments['type']=='photo'){                            
               foreach ($v_attachments['photo']['sizes'] as $k_sizes => $v_sizes) {
@@ -354,6 +354,7 @@ if($this->mode_debug) { dump($v_peer); }
       //dump($messagesGetHistory);
 
   } //end function update
+
 //проверка вложений
   public function checkItemsPhoto($data){
    $photos = array();
@@ -442,7 +443,6 @@ if($this->mode_debug) { dump($v_peer); }
         }
       }
       return $photos;
-
     }
 
   //обработка полученных данных
