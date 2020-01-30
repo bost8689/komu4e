@@ -450,15 +450,14 @@ if($this->mode_debug) { dump($v_peer); }
       //if($this->mode_update) {dump('MessageController.processing');} 
 
       //получаю все команды на языке 
-      $replyCommands = Lang::get('messages/replyCommands');        
-
+      $replyCommands = Lang::get('messages/replyCommands');
       $messages=$request->input('messages');
 
       foreach ($messages as $vMessage) {
        $usersvkId = $vMessage['usersvk_id'];
        $userId = $vMessage['user_id'];
-          //ищу этого пользователя
-       $Usersvk = $this->getUsersInDB(['user_id'=>$usersvkId]);            
+       //ищу этого пользователя
+       $Usersvk = $this->getUsersInDB(['user_id'=>$userId]);            
        $this->Usersvk = $Usersvk;
 
        if(!empty($vMessage['status'])){
@@ -468,6 +467,9 @@ if($this->mode_debug) { dump($v_peer); }
          $this->messagesSend(Null);                       
          break;
          case 'Прайс':
+         // dump($vMessage);
+         // dump($this->Usersvk);
+         // dd($replyCommands['Прайс']);
          $this->message = $replyCommands['Прайс'];                        
          $this->messagesSend(Null); 
          break;
@@ -546,16 +548,16 @@ if($this->mode_debug) { dump($v_peer); }
              }
 
   //отправка сообщения пользователю
-             public function messagesSend($data){
-               $params = array(             
-                'user_id' => $this->Usersvk->user_id,
-          'message' => $this->message, //220409092 Вячеслав Тихонов
-          'random_id'=> rand(), //рандомное число
-          //'group_ids' => $group_ids,    
-        );
-               $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);
-               return $messagesSend;     
-             }
+  public function messagesSend($data){
+  $params = array(             
+  'user_id' => $this->Usersvk->user_id,
+  'message' => $this->message, //220409092 Вячеслав Тихонов
+  'random_id'=> rand(), //рандомное число
+  //'group_ids' => $group_ids,    
+  );
+  $messagesSend = VK::messagesSend($this->token_group_kndm,$params,Null);
+  return $messagesSend;     
+  }
 
   //Проверяем состоит ли пользователь в группе true
              public function groupsisMember($data){
