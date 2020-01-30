@@ -124,6 +124,10 @@ class BnipController extends Controller
         //dump($bnips);
         foreach ($aBnips as $kBnip => $vBnip) {
             $Bnip = Bnip::with('Usersvk','Photosbnip')->find($vBnip['bnip_id']);
+            if (empty($vBnip['status'])) {
+                $vBnip['status']="Найдено";
+                dump('Не было статуса');
+            }
             $Bnip->status = $vBnip['status'];
             $Bnip->user_id=Auth::user()->id;
             $Bnip->save();
