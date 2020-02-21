@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
             $UpdateEventController = new UpdateEventController();
             $result = $UpdateEventController->getEvent();
             //Log::channel('UpdateEventController')->info(['Запуск $UpdateEventController->getEvent'=>$result]);
-        })->everyMinute();
+        })->everyFiveMinutes();
     }
 
     /**
