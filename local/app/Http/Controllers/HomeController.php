@@ -5,6 +5,16 @@ namespace Komu4e\Http\Controllers;
 use Illuminate\Http\Request;
 //use Komu4e\Http\Controllers\MessageController;
 
+use Viber\Bot;
+use Viber\Api\Sender;
+use Viber\Client;
+
+/**
+ * Build bot with viber client
+ *
+ * @author Stanislav
+ */
+
 class HomeController extends Controller
 {
 
@@ -32,6 +42,31 @@ class HomeController extends Controller
      */
     public function index()
     {
+
+    $apiKey = '4b8b89fab867d3d0-487a5c4f0a9c5af4-bff9cf5444355d1a';
+    // reply name
+    // $botSender = new Sender([
+    //     'name' => 'komu4egrill',
+    //     'avatar' => 'https://developers.viber.com/img/favicon.ico',
+    // ]);    
+
+    
+
+    //$config = require('./config.php');
+
+    //$apiKey = $config['apiKey']; // from PA "Edit Details" page
+    $webhookUrl = "https://komu4e.ru/viber/bot/komu4egrill"; // for exmaple https://my.com/bot.php
+
+    try {
+        $client = new Client(['token' => $apiKey]);
+        $result = $client->setWebhook($webhookUrl);
+        echo "Success!\n"; // print_r($result);
+    } catch (Exception $e) {
+        echo 'Error: ' . $e->getMessage() . "\n";
+    }
+
+
+
         return view('home',['fileError' => $this->checkFileError()]);    
     }
 
@@ -46,3 +81,7 @@ class HomeController extends Controller
         return $fileError;           
     }
 }
+
+
+
+

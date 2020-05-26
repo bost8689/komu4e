@@ -27,6 +27,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::match(['get', 'post'],'/viber/bot/komu4egrill', 'Viber\Bot\BotKomu4egrillController@index')->name('BotKomu4egrill');
+
 Route::group(['middleware' => ['auth','permission']], function () {
 
 	// Route::get('/home', 'HomeController@index')->middleware('auth')->name('home');

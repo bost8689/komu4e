@@ -10,7 +10,9 @@
         @endif 
       <div class="card">        
         <div class="card-header">Cтена</div>
-        <div class="card-body">
+        <div class="card-body"> 
+        	<audio src="audio.mp3" type="audio/mpeg" controls autoplay loop > нет аудио</audio>
+
           @if (session('status'))
           <div class="alert alert-success" role="alert">
             {{ session('status') }}
@@ -20,6 +22,13 @@
         </div>
       </div>     
     </div>    
+    <script>
+
+    // 	setInterval(function() {
+    // 		console.log("tets");  
+  		// }, 1000) //каждую секунду
+    	
+    </script>
 @endsection
     
 

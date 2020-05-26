@@ -20,5 +20,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         '/callback/auto',
+        '/viber/bot/komu4egrill',
     ];
 }
