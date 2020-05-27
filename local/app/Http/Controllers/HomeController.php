@@ -57,13 +57,13 @@ class HomeController extends Controller
     //$apiKey = $config['apiKey']; // from PA "Edit Details" page
     $webhookUrl = "https://komu4e.ru/viber/bot/komu4egrill"; // for exmaple https://my.com/bot.php
 
-    try {
-        $client = new Client(['token' => $apiKey]);
-        $result = $client->setWebhook($webhookUrl);
-        echo "Success!\n"; // print_r($result);
-    } catch (Exception $e) {
-        echo 'Error: ' . $e->getMessage() . "\n";
-    }
+    // try {
+    //     $client = new Client(['token' => $apiKey]);
+    //     $result = $client->setWebhook($webhookUrl);
+    //     echo "Success!\n"; // print_r($result);
+    // } catch (Exception $e) {
+    //     echo 'Error: ' . $e->getMessage() . "\n";
+    // }
 
 
 
