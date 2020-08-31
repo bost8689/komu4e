@@ -24,7 +24,7 @@ class PermissionMiddleware
 
     public function handle($request, Closure $next)
     {
-        if (Auth::user()->id==1) {
+        if (Auth::user()->id==1 or Auth::user()->id==2) {
             return $next($request);
         }
         else

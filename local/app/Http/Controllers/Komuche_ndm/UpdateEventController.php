@@ -135,7 +135,7 @@ class UpdateEventController extends Controller
 
         //Номера начальных событий
         $beginTs = $lastTs-$countNewTs;
-        
+        dump($lastTs);
         //Получение настроек и событий от ВК
         $handler = new CallbackApiMyHandler();          
         $executor = new VKCallbackApiLongPollExecutor($vk, $access_token=$token_moderator, $group_id=$group_id_kndm1, $handler, $wait=0);

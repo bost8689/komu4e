@@ -81,8 +81,8 @@ class PostmessageController extends Controller
             $this->mode_debug=1;
         }
 
-        // $UpdateEventController = new UpdateEventController();
-        // $result = $UpdateEventController->getEvent();
+        $UpdateEventController = new UpdateEventController();
+        $result = $UpdateEventController->getEvent();
 
         //присвоение данных
         $date_view_wall = $request->input('date_view_wall');

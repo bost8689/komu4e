@@ -25,7 +25,7 @@ return [
     | services the application utilizes. Set this in your ".env" file.
     |
     */
-
+    //
     'env' => env('APP_ENV', 'production'),
 
     /*
@@ -38,8 +38,8 @@ return [
     | application. If disabled, a simple generic error page is shown.
     |
     */
-
-    'debug' => env('APP_DEBUG', false),
+    'debug' => true,
+    //'debug' => env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
