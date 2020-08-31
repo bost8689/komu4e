@@ -83,6 +83,8 @@ class PostmessageController extends Controller
 
         $UpdateEventController = new UpdateEventController();
         $result = $UpdateEventController->getEvent();
+        
+        
 
         //присвоение данных
         $date_view_wall = $request->input('date_view_wall');
@@ -138,6 +140,7 @@ class PostmessageController extends Controller
             'кол-во уникальных пользователей $collectUsersvk'=>count($collectUsersvk),        
             'коллекция уникальных пользователей $collectUsersvk'=>$collectUsersvk,
             'коллекция постов по уникальным пользователям $collectPostmessages'=>$collectPostmessages,
+            $result,
         ]);}  
 
 
@@ -317,6 +320,8 @@ class PostmessageController extends Controller
 
     //обработка полученных данных
     public function processing(Request $request){
+        
+        //dd($request->all());
 
         //счётчик выполненных комманд
         $countPostCommand=array('Удалить' => 0,'Реклама' => 0,'Повтор' => 0,'Ссылка' => 0,'Более3' => 0,'Найдено' => 0,'Потеряно' => 0,'Заказ' => 0,'Просмотрено'=>0);    
@@ -402,17 +407,23 @@ class PostmessageController extends Controller
                 }
                 else {
                     //стоит галочка просмотрено
+                    
                     if (!empty($request->input('checkbox_prosmotreno'))) {
-                        if ($Postmessage->status==Null) { //чтобы стараые команды не перезаписывались
-                            $Postmessage->status='Просмотрено';
+                        
+                        if ($Postmessage->status==null) { //чтобы стараые команды не перезаписывались
+                            //dump($Postmessage);
+                            $Postmessage -> status = "Просмотрено";
                             $countPostCommand['Просмотрено']++;
-                        }                            
+                            //dd($Postmessage);
+                            
+                        }  
                     }
                 }
-
+                
                 //сохраняю все изменения
                 $Postmessage->user_id=Auth::user()->id; 
                 $Postmessage->save();
+                //dd($Postmessage);
             }
         }
 

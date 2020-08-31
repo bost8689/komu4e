@@ -23,9 +23,12 @@
       Кол-во новых фото: {{$lastCountAddDBPhotosPost}}
       </div>
 
+    
+    
       @foreach($collectPostmessages as $collectPostmessage)
       <div class="card">
         <div class="card-header">
+          №{{$loop->index}}  
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя">
           <img src={{$collectPostmessage['Usersvk']->photo}} alt="..." class="img-rounded" height="50px"></a>
           <a href=https://vk.com/id{{$collectPostmessage['Usersvk']->user_id}} target=_blank title="Просмотреть пользователя id{{$collectPostmessage['Usersvk']->user_id}}" >{{$collectPostmessage['Usersvk']->firstname}} {{$collectPostmessage['Usersvk']->lastname}}</a>
@@ -72,6 +75,7 @@
               <img src={{$Photopostmessage->photomin_url}} alt="..." class="img-rounded"></a>              
             @endforeach 
             <br><br>
+            
             <select class="form-control" name=processing[{{$loop->parent->index}}][postmessage_id][{{$Postmessage->id}}] size=1>
             <option value="" selected></option>
             <option value=Удалить>Удалить</option>
